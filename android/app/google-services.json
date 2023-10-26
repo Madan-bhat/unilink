@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "320875435465",
+    "firebase_url": "https://unilinkchat-default-rtdb.firebaseio.com",
+    "project_id": "unilinkchat",
+    "storage_bucket": "unilinkchat.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:320875435465:android:8594fdc6a2291ccb134418",
+        "android_client_info": {
+          "package_name": "com.unilink"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "320875435465-pa2ag60e924do2rs57v4ccoliuhgsvlf.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.unilink",
+            "certificate_hash": "5e8f16062ea3cd2c4a0d547876baa6f38cabf625"
+          }
+        },
+        {
+          "client_id": "320875435465-6qu6001aqve76sr9gs600n1eitekvof9.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDqtv1CFOnbhuyD-MNG3WluZwFktA-ZGto"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "320875435465-6qu6001aqve76sr9gs600n1eitekvof9.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
