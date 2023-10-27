@@ -18,6 +18,7 @@ export default function Requests() {
         .onSnapshot(data => {
           let userData = data.data();
           setRequests(userData?.requests);
+          console.log(userData?.requests);
         });
     } catch (e) {}
   }, []);

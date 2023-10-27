@@ -36,6 +36,7 @@ export default function Search() {
     let Lists: {
       uid: any;
       userName: any;
+      token: any;
       requested: any;
       userImg: any;
       chats: any;

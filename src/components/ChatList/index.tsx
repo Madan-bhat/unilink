@@ -61,8 +61,7 @@ export default function ChatList({item}: any) {
     firestore()
       .collection('users')
       .doc(item)
-      .get()
-      .then((data: any) => {
+      .onSnapshot((data: any) => {
         return setUser(data?.data());
       });
   }, [item]);
@@ -87,14 +86,19 @@ export default function ChatList({item}: any) {
       className="bg-white-900 mt-2 p-2 justify-between rounded-md my-2 w-full">
       <View className="flex-row items-center justify-between">
         <View className="items-center flex-row">
-          <Image
-            source={{
-              uri: users?.userImg
-                ? users?.userImg
-                : 'https://static.vecteezy.com/system/resources/previews/005/129/844/non_2x/profile-user-icon-isolated-on-white-background-eps10-free-vector.jpg',
-            }}
-            className="h-12 rounded-full w-12"
-          />
+          <View>
+            {users?.status === 'online' && (
+              <View className=" bg-green-500 border-white border-2 rounded-full z-10 absolute bottom-1 right-1 h-4 w-4" />
+            )}
+            <Image
+              source={{
+                uri: users?.userImg
+                  ? users?.userImg
+                  : 'https://static.vecteezy.com/system/resources/previews/005/129/844/non_2x/profile-user-icon-isolated-on-white-background-eps10-free-vector.jpg',
+              }}
+              className="h-12 rounded-full w-12"
+            />
+          </View>
           <View className="ml-3">
             <Text className="text-slate-900 text-lg font-sans">
               {users?.userName}

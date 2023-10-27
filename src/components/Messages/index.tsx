@@ -12,11 +12,17 @@ interface IMessages {
   text: string;
 }
 
-function Messages({messages, onEndReached, loading}: IMessages) {
+function Messages({
+  messages,
+  chatUser,
+  currentUser,
+  onEndReached,
+  loading,
+}: any) {
   const renderMessages = ({item}: any) => {
     return (
       <>
-        <ChatBubble item={item} />
+        <ChatBubble chatUser={chatUser} currentUser={currentUser} item={item} />
       </>
     );
   };

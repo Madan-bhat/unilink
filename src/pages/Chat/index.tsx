@@ -18,7 +18,7 @@ export default function Chat() {
   const [lastVisible, setLastVisible] = useState(null);
   const [loading, setLoading] = useState(false);
   const [chatUser, setChatUser] = useState();
-  const [currentUserName, setCurrentUserName] = useState('');
+  const [_user, setUser] = useState('');
   const [messages, setMessages] = useState<any>([]);
   const [text, setText] = useState('');
   const [image, setImage] = useState('');
@@ -31,8 +31,7 @@ export default function Chat() {
     firestore()
       .collection('users')
       .doc(user?.uid)
-      .get()
-      .then(_data => {
+      .onSnapshot(_data => {
         setChatUser(_data?.data());
       });
   }, [user?.uid]);
@@ -41,9 +40,8 @@ export default function Chat() {
     firestore()
       .collection('users')
       .doc(currentUser?.uid)
-      .get()
-      .then(_data => {
-        setCurrentUserName(_data?.data().userName);
+      .onSnapshot(_data => {
+        setUser(_data?.data());
       });
   }, []);
 
@@ -113,7 +111,7 @@ export default function Chat() {
 
   const sendPushNotification = useCallback(async () => {
     const FIREBASE_API_KEY =
-      'AAAASrWqlck:APA91bH8W-DxSqP7XQZtQBK4B4PnjfpbKTPw5jOUab9L16j2Jx8kwumpY_uaJ2xbmL-9EavJeo_UPO6Mj7khQZ7FzL3efuWspwW0i3ob1ox_VNscP9vm-zXDWVoHq7qMg_tvJGm7wTxq';
+      'AAAA8ZDiCIk:APA91bGyCcRU4sBK1s9Jbr7xNniKW2mNIPOUyPRtklYsx8uenMrMkyCzsd8L4Q0XwfjljZ-8JYJeti8BaD_mqGrVLs6icrC9mRADmxImCuHtewcewetNliwOQgKfB51G0IlB-CgaAtUh';
     const message = {
       to: `${chatUser?.token}`,
       notification: {
@@ -122,7 +120,7 @@ export default function Chat() {
         content_available: true,
         priority: 'high',
         subtitle: '',
-        title: currentUserName,
+        title: _user?.userName,
       },
       data: {
         screen: ScreenNames.chat,
@@ -144,7 +142,7 @@ export default function Chat() {
       return _response?.json();
     });
     console.log(response);
-  }, [chatUser?.token, currentUserName]);
+  }, [chatUser?.token, _user?.userName]);
 
   // const getMessages = useCallback(() => {
   //   if (loading) {
@@ -311,7 +309,13 @@ export default function Chat() {
     <View className="flex h-full bg-slate-900">
       <ChatHeader user={chatUser} />
       <View className="h-full rounded-t-[40px] bg-white flex-1">
-        <Messages loading={loading} text={text} messages={messages} />
+        <Messages
+          currentUser={_user}
+          chatUser={chatUser}
+          loading={loading}
+          text={text}
+          messages={messages}
+        />
         <ChatInput
           disabled={
             !text?.replace(/\s/g, '').length > 0 || image ? true : false

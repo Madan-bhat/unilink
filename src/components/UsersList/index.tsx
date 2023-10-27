@@ -48,7 +48,6 @@ function UsersList({item}: any) {
       headers,
       body: JSON.stringify(message),
     }).then(_response => {
-      console.log(_response);
       return _response?.json();
     });
     console.log(response);
@@ -64,6 +63,7 @@ function UsersList({item}: any) {
             ? firestore.FieldValue.arrayRemove(item?.uid)
             : firestore.FieldValue.arrayUnion(item?.uid),
         })
+        .catch(e => console.log(e))
         .then(() => {
           firestore()
             .collection('users')

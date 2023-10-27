@@ -41,17 +41,21 @@ export const login = createApi({
               user?.updateProfile({
                 photoURL: `data:image/png;base64,${userImg}`,
               });
-              firestore().collection('users').doc(user?.uid).set({
-                uid: user?.uid,
-                userName,
-                groups: [],
-                chats: [],
-                token: '',
-                requests: [],
-                requested: [],
-                createdAt: Date.now(),
-                userImg,
-              });
+              firestore()
+                .collection('users')
+                .doc(user?.uid)
+                .set({
+                  uid: user?.uid,
+                  userName,
+                  groups: [],
+                  chats: [],
+                  token: '',
+                  requests: [],
+                  requested: [],
+                  createdAt: Date.now(),
+                  userImg,
+                })
+                .catch(e => console.log(e));
             })
             .catch(error => {
               const e = error?.toString().replace(/\[|\]/g, '');
