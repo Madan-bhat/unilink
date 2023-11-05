@@ -1,25 +1,33 @@
 import React, {useCallback, useEffect, useState} from 'react';
-import moment from 'moment';
 import firestore from '@react-native-firebase/firestore';
-import {Alert, View} from 'react-native';
+import storage from '@react-native-firebase/storage';
+
+import {View} from 'react-native';
 import {useRoute} from '@react-navigation/native';
 
 import ChatHeader from '../../components/ChatHeader';
 import Messages from '../../components/Messages';
-import ChatInput from '../../components/ChatInput';
 
-import {user as currentUser} from '../../utils/user';
-import ImageCropPicker from 'react-native-image-crop-picker';
-import SelectedImages from '../../components/SelectedImages';
 import {ScreenNames} from '../../utils/screenConfig';
 
+import ImageCropPicker from 'react-native-image-crop-picker';
+import SelectedImages from '../../components/SelectedImages';
+import {useDispatch, useSelector} from 'react-redux';
+import {updateChatUser} from '../../redux/user.slice';
+
+const PLACEHOLDER_IMG =
+  'https://static.vecteezy.com/system/resources/previews/005/129/844/non_2x/profile-user-icon-isolated-on-white-background-eps10-free-vector.jpg';
+
 export default function Chat() {
-  const [emojiBoard, setShowEmojiBoard] = useState(false);
-  const [lastVisible, setLastVisible] = useState(null);
-  const [loading, setLoading] = useState(false);
-  const [chatUser, setChatUser] = useState();
-  const [_user, setUser] = useState('');
+  const currentUser = useSelector(
+    (state: {user: any}) => state?.user?.currentUser,
+  );
+  const dispatch = useDispatch();
   const [messages, setMessages] = useState<any>([]);
+  const [lastVisible, setLastVisible] = useState<any>(null);
+  const [isImageUploading, setImageUploading] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [chatUser, setChatUser] = useState<any>();
   const [text, setText] = useState('');
   const [image, setImage] = useState('');
   const [selectedImageModalVisible, setSelectedImageModal] = useState(false);
@@ -33,21 +41,33 @@ export default function Chat() {
       .doc(user?.uid)
       .onSnapshot(_data => {
         setChatUser(_data?.data());
+        dispatch(updateChatUser(_data?.data()));
       });
-  }, [user?.uid]);
-
-  const getUser = useCallback(() => {
-    firestore()
-      .collection('users')
-      .doc(currentUser?.uid)
-      .onSnapshot(_data => {
-        setUser(_data?.data());
-      });
-  }, []);
+  }, [dispatch, user?.uid]);
 
   const handleToggleSelectedImageModal = useCallback(() => {
     setSelectedImageModal(!selectedImageModalVisible);
   }, [selectedImageModalVisible]);
+
+  const uploadImage = useCallback(async () => {
+    if (image) {
+      try {
+        setImageUploading(!isImageUploading);
+        const response = await fetch(image);
+        const blob = await response.blob();
+        const imageName = `${currentUser?.uid}_${Date.now()}.jpg`; // You can use a unique name for each image
+        const ref = storage().ref().child(`images/${imageName}`);
+
+        await ref.put(blob);
+        const url = await ref.getDownloadURL();
+        console.log('Image uploaded successfully. URL:', url);
+
+        return url;
+      } catch (error) {
+        console.error('Error uploading image:', error);
+      }
+    }
+  }, [currentUser?.uid, image, isImageUploading]);
 
   const takePhotoFromCamera = () => {
     ImageCropPicker.openCamera({
@@ -55,7 +75,7 @@ export default function Chat() {
       cropping: true,
       compressImageQuality: 0.5,
     }).then((_image: any) => {
-      setImage(`${_image?.data}`);
+      setImage(`${_image.path}`);
       handleToggleSelectedImageModal();
     });
   };
@@ -66,26 +86,9 @@ export default function Chat() {
       includeBase64: true,
       cropping: true,
     }).then((_image: any) => {
-      setImage(`${_image?.data}`);
+      setImage(`${_image.path}`);
       handleToggleSelectedImageModal();
     });
-  };
-
-  const handleImageSelection = () => {
-    Alert.alert('Select Image', 'Choose an option', [
-      {
-        text: 'Choose from Library',
-        onPress: () => choosePhotoFromLibrary(),
-      },
-      {
-        text: 'Take a Photo',
-        onPress: () => takePhotoFromCamera(),
-      },
-      {
-        text: 'Cancel',
-        style: 'cancel',
-      },
-    ]);
   };
 
   const updateReadMessage = useCallback(() => {
@@ -96,7 +99,7 @@ export default function Chat() {
 
     try {
       let docRef = firestore()
-        .collection('chats')
+        .collection('chatRoom')
         .doc(docid)
         .collection('messages');
       docRef.get().then(querySnapshot => {
@@ -107,7 +110,7 @@ export default function Chat() {
         });
       });
     } catch (error) {}
-  }, [user?.uid]);
+  }, [currentUser?.uid, user?.uid]);
 
   const sendPushNotification = useCallback(async () => {
     const FIREBASE_API_KEY =
@@ -120,7 +123,7 @@ export default function Chat() {
         content_available: true,
         priority: 'high',
         subtitle: '',
-        title: _user?.userName,
+        title: currentUser?.userName,
       },
       data: {
         screen: ScreenNames.chat,
@@ -133,208 +136,233 @@ export default function Chat() {
       'Content-Type': 'application/json',
       Authorization: 'key=' + FIREBASE_API_KEY,
     });
-    let response = await fetch('https://fcm.googleapis.com/fcm/send', {
+    await fetch('https://fcm.googleapis.com/fcm/send', {
       method: 'POST',
       headers,
       body: JSON.stringify(message),
     }).then(_response => {
-      console.log(_response);
       return _response?.json();
     });
-    console.log(response);
-  }, [chatUser?.token, _user?.userName]);
+  }, [chatUser?.token, currentUser]);
 
-  // const getMessages = useCallback(() => {
-  //   if (loading) {
-  //     return;
-  //   }
+  const loadMoreMessages = useCallback(() => {
+    let PAGE_SIZE = 3; // Number of messages to load per page
 
-  //   setLoading(true);
-
-  //   const docid =
-  //     user?.uid > currentUser?.uid
-  //       ? currentUser?.uid + '-' + user?.uid
-  //       : user?.uid + '-' + currentUser?.uid;
-
-  //   const messagesRef = firestore()
-  //     .collection('chats')
-  //     .doc(docid)
-  //     .collection('messages')
-  //     .orderBy('date', 'desc')
-  //     .limit(8); // Define batchSize as the number of messages to load at once
-
-  //   if (lastVisible) {
-  //     messagesRef.startAfter(lastVisible);
-  //   }
-
-  //   try {
-  //     messagesRef.onSnapshot(snapshot => {
-  //       const newMessages = snapshot.docs.map(doc => {
-  //         const {sentBy, sentTo, messageText, read, time, date, image} =
-  //           doc.data();
-  //         return {
-  //           sentBy,
-  //           sentTo,
-  //           messageText,
-  //           time,
-  //           date,
-  //           image,
-  //           read,
-  //         };
-  //       });
-
-  //       setMessages(prevMessages =>
-  //         lastVisible ? [...prevMessages, ...newMessages] : newMessages,
-  //       );
-
-  //       if (snapshot.docs.length > 0) {
-  //         setLastVisible(snapshot.docs[snapshot.docs.length - 1]);
-  //       }
-  //     });
-  //   } catch (error) {
-  //     console.error('Error fetching messages:', error);
-  //   } finally {
-  //     setLoading(false);
-  //   }
-  // }, [loading, user?.uid, lastVisible]);
-
-  const getMessages = useCallback(() => {
-    setLoading(true);
     if (loading) {
       return;
     }
-    const docid =
-      user?.uid > currentUser?.uid
-        ? currentUser?.uid + '-' + user?.uid
-        : user?.uid + '-' + currentUser?.uid;
+
+    setLoading(true);
+
+    if (!lastVisible) {
+      setLoading(false);
+      return;
+    }
+
+    const docId =
+      user.uid > currentUser.uid
+        ? `${currentUser.uid}-${user.uid}`
+        : `${user.uid}-${currentUser.uid}`;
+
+    let messageRef = firestore()
+      .collection('chatRoom')
+      .doc(docId)
+      .collection('messages')
+      .orderBy('createdAt', 'desc')
+      .startAfter(lastVisible)
+      .limit(PAGE_SIZE);
 
     try {
-      const messagesRef = firestore()
-        .collection('chats')
-        .doc(docid)
-        .collection('messages')
-        .orderBy('date', 'desc');
+      messageRef.get().then(querySnapshot => {
+        PAGE_SIZE = querySnapshot.docs.length;
+        const newMessages = querySnapshot.docs.map(docSnapshot => {
+          const data = docSnapshot.data();
 
-      let query = messagesRef;
-      if (lastVisible) {
-        query = query.startAfter(lastVisible);
-      }
-      query.onSnapshot(snapshot => {
-        const newMessages = snapshot.docs.map(doc => {
-          const {sentBy, sentTo, messageText, read, time, date, image} =
-            doc.data();
+          const createdAt =
+            data.createdAt && data.createdAt.toDate
+              ? data.createdAt.toDate()
+              : new Date();
+
           return {
-            sentBy,
-            sentTo,
-            messageText,
-            time,
-            date,
-            image,
-            read,
+            ...data,
+            createdAt,
           };
         });
 
-        if (lastVisible) {
-          setMessages((prevMessages: any) => [...prevMessages, ...newMessages]);
+        setMessages((prevMessages: any) => [...prevMessages, ...newMessages]);
+        if (querySnapshot.docs.length > 0) {
+          setLastVisible(querySnapshot.docs[querySnapshot.docs.length - 1]);
         } else {
-          setMessages(newMessages);
+          setLastVisible(null);
         }
+        setLoading(false);
+      });
+    } catch (error) {
+      console.error('Error fetching more messages:', error);
+      setLoading(false);
+    }
+  }, [currentUser, user, loading, lastVisible]);
 
-        if (snapshot.docs.length > 0) {
-          setLastVisible(snapshot.docs[snapshot.docs.length - 1]);
+  const getInitialMessages = useCallback(() => {
+    let PAGE_SIZE = 10; // Number of messages to load per page
+
+    if (loading) {
+      return;
+    }
+    const docId =
+      user.uid > currentUser.uid
+        ? `${currentUser.uid}-${user.uid}`
+        : `${user.uid}-${currentUser.uid}`;
+    let messageRef = firestore()
+      .collection('chatRoom')
+      .doc(docId)
+      .collection('messages')
+      .orderBy('createdAt', 'desc')
+      .limit(PAGE_SIZE);
+
+    try {
+      messageRef.onSnapshot(querySnapshot => {
+        const newMessages = querySnapshot.docs.map(docSnapshot => {
+          const data = docSnapshot.data();
+
+          const createdAt =
+            data.createdAt && data.createdAt.toDate
+              ? data.createdAt.toDate()
+              : new Date();
+
+          return {
+            ...data,
+            createdAt,
+          };
+        });
+
+        setMessages(newMessages);
+        if (querySnapshot.docs.length > 0) {
+          setLastVisible(querySnapshot.docs[querySnapshot.docs.length - 1]);
         }
       });
     } catch (error) {
       console.error('Error fetching messages:', error);
     }
-  }, [loading, user?.uid, lastVisible]);
+  }, [currentUser, user, loading]);
+  useEffect(() => {
+    getInitialMessages();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
-  const onSend = useCallback(() => {
-    const msg = {
-      sentBy: currentUser?.uid,
-      sentTo: user?.uid,
-      messageText: text,
-      time: moment().format('hh:mm A'),
-      date: Date.now(),
+  const onSend = useCallback(
+    async (message: any = []) => {
+      const docid =
+        user?.uid > currentUser?.uid
+          ? currentUser?.uid + '-' + user?.uid
+          : user?.uid + '-' + currentUser?.uid;
+
+      try {
+        let url: any = ''; // Initialize url to an empty string
+
+        if (image) {
+          url = await uploadImage(); // Await the image upload and get the URL
+        }
+
+        const createdAt = new Date();
+
+        const msg = {
+          ...message[0],
+          createdAt,
+          _id: message[0]?._id || Date.now(),
+          text: message[0]?.text || text,
+          sentBy: currentUser?.uid,
+          sentTo: user?.uid,
+          image: url, // Use the URL obtained from the image upload
+          liked: false,
+          user: {
+            _id: currentUser.uid,
+            avatar: chatUser?.userImg || PLACEHOLDER_IMG,
+          },
+          readBy: firestore.FieldValue.arrayUnion(currentUser?.uid),
+        };
+
+        await firestore()
+          .collection('chatRoom')
+          .doc(docid)
+          .collection('messages')
+          .add(msg);
+
+        setText('');
+        setImage('');
+        setImageUploading(!isImageUploading);
+
+        if (selectedImageModalVisible) {
+          handleToggleSelectedImageModal();
+        }
+
+        sendPushNotification();
+      } catch (error) {
+        console.error('Error sending message:', error);
+      }
+    },
+    [
+      user?.uid,
+      currentUser.uid,
       image,
-      readBy: firestore.FieldValue.arrayUnion(currentUser?.uid),
-    };
-    const docid =
-      user?.uid > currentUser?.uid
-        ? currentUser?.uid + '-' + user?.uid
-        : user?.uid + '-' + currentUser?.uid;
+      text,
+      chatUser?.userImg,
+      isImageUploading,
+      selectedImageModalVisible,
+      sendPushNotification,
+      uploadImage,
+      handleToggleSelectedImageModal,
+    ],
+  );
 
-    try {
+  const handleLike = useCallback(
+    (id: any) => {
+      const docid =
+        user?.uid > currentUser?.uid
+          ? currentUser?.uid + '-' + user?.uid
+          : user?.uid + '-' + currentUser?.uid;
       firestore()
-        .collection('chats')
+        .collection('chatRoom')
         .doc(docid)
         .collection('messages')
-        .add(msg);
-      setText('');
-      setImage('');
-      if (selectedImageModalVisible) {
-        handleToggleSelectedImageModal();
-      }
-    } catch (error) {}
-    sendPushNotification();
-  }, [
-    handleToggleSelectedImageModal,
-    image,
-    selectedImageModalVisible,
-    sendPushNotification,
-    text,
-    user?.uid,
-  ]);
+        .doc(`${id}`)
+        .update({
+          liked: true,
+        });
+    },
+    [currentUser?.uid, user?.uid],
+  );
 
   const handleChangeText = useCallback((val: string) => {
     setText(val);
   }, []);
 
-  const handleToggleEmojiBoard = useCallback(() => {
-    setShowEmojiBoard(!emojiBoard);
-  }, [emojiBoard]);
-
-  const handleOnEmojiSelect = useCallback(emoji => {
-    setText(prevText => prevText + emoji?.emoji);
-  }, []);
-
   useEffect(() => {
-    getMessages();
-    getUser();
     getChatUser();
     updateReadMessage();
-  }, [getChatUser, getMessages, getUser, updateReadMessage]);
+  }, [getChatUser, updateReadMessage]);
 
   return (
-    <View className="flex h-full bg-slate-900">
+    <View className="flex h-full bg-black">
       <ChatHeader user={chatUser} />
       <View className="h-full rounded-t-[40px] bg-white flex-1">
         <Messages
-          currentUser={_user}
+          handleInputChange={handleChangeText}
+          openCamera={() => takePhotoFromCamera()}
+          openLibrary={() => choosePhotoFromLibrary()}
+          onSend={onSend}
+          onLike={handleLike}
+          currentUser={currentUser}
           chatUser={chatUser}
           loading={loading}
+          loadMore={loadMoreMessages}
           text={text}
           messages={messages}
         />
-        <ChatInput
-          disabled={
-            !text?.replace(/\s/g, '').length > 0 || image ? true : false
-          }
-          showSelectImage
-          selectImage={handleImageSelection}
-          isEmojiBoardVisible={emojiBoard}
-          onEmojiSelect={handleOnEmojiSelect}
-          onEmojiBoardOpen={handleToggleEmojiBoard}
-          text={text}
-          onChange={handleChangeText}
-          onSend={onSend}
-        />
       </View>
       <SelectedImages
+        isImageUploading={isImageUploading}
         onClose={handleToggleSelectedImageModal}
-        isEmojiBoardVisible={emojiBoard}
-        onEmojiSelect={handleOnEmojiSelect}
-        onEmojiBoardOpen={handleToggleEmojiBoard}
         text={text}
         onChange={handleChangeText}
         onSend={onSend}

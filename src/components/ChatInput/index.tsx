@@ -1,81 +1,104 @@
-import {View, TouchableOpacity, KeyboardAvoidingView} from 'react-native';
 import React from 'react';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+import {TextInput} from 'react-native-paper';
+import {View, TouchableOpacity, KeyboardAvoidingView} from 'react-native';
+
 import Input from '../../ui/Input';
 import EmojiBoard from 'rn-emoji-keyboard';
-import {TextInput} from 'react-native-paper';
+import {useActionSheet} from '@expo/react-native-action-sheet';
+import ActivityIndicator from '../../ui/ActivityIndicator';
 
 interface IChatInput {
   onChange: (prop: string) => void;
   onSend: () => void;
   text: string;
-  onEmojiBoardOpen: () => void;
-  isEmojiBoardVisible: boolean;
   selectImage?: () => void;
   showSelectImage: boolean;
-  onEmojiSelect: (emoji: any) => void;
+  openCamera: () => void;
+  openLibrary: () => void;
   disabled?: boolean;
+  isImageUploading: boolean;
 }
 
 function ChatInput({
   onChange,
-  onEmojiBoardOpen,
-  isEmojiBoardVisible,
-  onEmojiSelect,
   text,
+  openCamera,
+  openLibrary,
   onSend,
-  selectImage,
+  isImageUploading,
   disabled,
   showSelectImage,
 }: IChatInput) {
+  const {showActionSheetWithOptions} = useActionSheet();
+  const onPress = () => {
+    const options = ['Choose From Library', 'Open Camera', 'Cancel'];
+    const cancelButtonIndex = 2;
+
+    showActionSheetWithOptions(
+      {
+        options,
+        cancelButtonIndex,
+      },
+      (selectedIndex: number) => {
+        switch (selectedIndex) {
+          case 1:
+            openCamera();
+
+            break;
+
+          case 2:
+            openLibrary();
+
+            break;
+
+          case cancelButtonIndex:
+          // Canceled
+        }
+      },
+    );
+  };
+  const _disabled = !text?.replace(/\s/g, '').length > 0 ? true : false;
   return (
-    <KeyboardAvoidingView className="flex-row absolute bottom-2 self-end flex-[1]">
+    <KeyboardAvoidingView className="flex-row bg-transparent absolute border-white rounded-full border-[0.5px] border-solid bottom-2 mx-2 self-center flex-[1]">
       <View className="flex-row flex-1 max-h-14">
         <View className="flex-[18] ">
           <Input
+            multiline
+            numberOfLines={4}
             value={text}
             clearButtonMode="always"
+            cursorColor={showSelectImage ? 'black' : 'white'}
             onChangeText={_val => onChange(_val)}
-            right={
-              showSelectImage ? (
-                <TextInput.Icon
-                  onPress={selectImage}
-                  icon={'image-outline'}
-                  color={'black'}
-                />
-              ) : (
-                <></>
-              )
-            }
             left={
               <TextInput.Icon
-                onPress={onEmojiBoardOpen}
-                icon={'sticker-emoji'}
-                color={'black'}
+                onPress={onPress}
+                icon={'image-outline'}
+                color={'white'}
               />
             }
+            textColor={showSelectImage ? 'black' : 'white'}
             placeholder="Type Your Message Here ...."
-            className=" bg-white  ml-2 shadow-slate-950 text-slate-900"
+            className=" bg-transparent text-white shadow-slate-950 "
           />
         </View>
         <View className="flex-[3] justify-center items-center ">
           <TouchableOpacity
-            disabled={disabled}
+            disabled={disabled ? disabled : _disabled}
             onPress={onSend}
             className={
               disabled
                 ? 'bg-slate-500 shadow-lg shadow-slate-500 rounded-full p-3'
-                : 'bg-slate-900 shadow-lg shadow-slate-800 rounded-full p-3'
+                : 'bg-black shadow-lg shadow-slate-800 rounded-full p-3'
             }>
-            <MaterialCommunityIcons name="send" size={18} color="white" />
+            {isImageUploading ? (
+              <ActivityIndicator color="white" />
+            ) : (
+              <MaterialCommunityIcons name="send" size={18} color="white" />
+            )}
           </TouchableOpacity>
         </View>
       </View>
-      <EmojiBoard
-        onClose={onEmojiBoardOpen}
-        open={isEmojiBoardVisible}
-        onEmojiSelected={onEmojiSelect}
-      />
     </KeyboardAvoidingView>
   );
 }

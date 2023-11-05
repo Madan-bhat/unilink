@@ -1,6 +1,7 @@
 import {View, TouchableOpacity} from 'react-native';
 import React, {useCallback, useState} from 'react';
 import AntDesign from 'react-native-vector-icons/AntDesign';
+import * as Animatable from 'react-native-animatable';
 
 import Modal from '../../ui/Modal';
 import Text from '../../ui/Text';
@@ -11,10 +12,12 @@ import {validateLoginUser} from '../../utils/validateUser';
 import {useNavigation} from '@react-navigation/native';
 import {Screen} from 'react-native-screens';
 import {ScreenNames} from '../../utils/screenConfig';
+import ActivityIndicator from '../../ui/ActivityIndicator';
 
 export default function Login() {
   const [login, {isSuccess}] = useLoginMutation();
   const navigation = useNavigation();
+  const [loading, setLoading] = useState(false);
   const [visible, setvisible] = useState<boolean>(false);
   const [userInfo, setUserInfo] = useState<{email: string; password: string}>({
     email: '',
@@ -51,11 +54,13 @@ export default function Login() {
   );
 
   const handleLogin = useCallback(() => {
+    setLoading(!loading);
     login(userInfo);
     if (isSuccess) {
       handleToggleModal();
     }
-  }, [handleToggleModal, isSuccess, login, userInfo]);
+    setLoading(!loading);
+  }, [handleToggleModal, isSuccess, loading, login, userInfo]);
 
   return (
     <View className="flex-1 h-full justify-center bg-white">
@@ -72,7 +77,7 @@ export default function Login() {
         </Text>
         <Input
           onChangeText={val => handleInputChange('email', val)}
-          left={<TextInput.Icon icon={'email'} />}
+          left={<TextInput.Icon color={'black'} icon={'email'} />}
           cursorColor="black"
           placeholder="Email"
           className="bg-white font-sans-bold"
@@ -81,7 +86,7 @@ export default function Login() {
         />
         <Input
           onChangeText={val => handleInputChange('password', val)}
-          left={<TextInput.Icon icon={'eye'} />}
+          left={<TextInput.Icon color={'black'} icon={'eye'} />}
           cursorColor="black"
           placeholder="Password"
           className="bg-white font-sans-bold"
@@ -93,12 +98,18 @@ export default function Login() {
             isUserInfoValid.errors.password ||
             isUserInfoValid.errors.userName}
         </Text>
-        <TouchableOpacity
-          disabled={!isUserInfoValid.isValid}
-          onPress={handleLogin}
-          className="bg-slate-900 self-end p-4 rounded-full">
-          <AntDesign name="right" size={24} color={'white'} />
-        </TouchableOpacity>
+        <Animatable.View duration={5000} animation={'bounceInRight'}>
+          <TouchableOpacity
+            disabled={!isUserInfoValid.isValid}
+            onPress={handleLogin}
+            className="bg-slate-900 self-end p-4 rounded-full">
+            {loading ? (
+              <ActivityIndicator color="white" />
+            ) : (
+              <AntDesign name="right" size={24} color={'white'} />
+            )}
+          </TouchableOpacity>
+        </Animatable.View>
         <View className="justify-center mt-2 items-center">
           <Text className="text-md text-slate-900 items-center justify-center font-sans">
             Don't Have An Account?{' '}

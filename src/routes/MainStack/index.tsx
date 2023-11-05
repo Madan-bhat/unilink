@@ -2,17 +2,20 @@ import * as React from 'react';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
 import messaging from '@react-native-firebase/messaging';
 import firestore from '@react-native-firebase/firestore';
+import {AppState} from 'react-native';
+import {useNavigation} from '@react-navigation/native';
+
 import TabStack from '../TabStack';
 import Login from '../../pages/Login';
 import Chat from '../../pages/Chat';
 import Loading from '../../pages/Loading';
 
-import {ScreenNames} from '../../utils/screenConfig';
 import Search from '../../pages/Search';
 import Register from '../../pages/Register';
 import ImageView from '../../components/ImageView';
-import {useNavigation} from '@react-navigation/native';
-import {AppState} from 'react-native';
+import EditProfile from '../../pages/EditProfile';
+
+import {ScreenNames} from '../../utils/screenConfig';
 import {user} from '../../utils/user';
 
 const Stack = createNativeStackNavigator();
@@ -33,7 +36,6 @@ function MainStack() {
   });
 
   const handleNotificationClick = (navigation, screenName, userId) => {
-    console.log('notification clicked', userId);
     navigation.navigate(screenName, {
       user: {
         uid: userId,
@@ -60,6 +62,7 @@ function MainStack() {
       <Stack.Screen name={ScreenNames.chat} component={Chat} />
       <Stack.Screen name={ScreenNames.search} component={Search} />
       <Stack.Screen name={ScreenNames.imageView} component={ImageView} />
+      <Stack.Screen name={ScreenNames.editprofile} component={EditProfile} />
     </Stack.Navigator>
   );
 }

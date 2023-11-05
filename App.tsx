@@ -4,15 +4,18 @@ import {Provider} from 'react-redux';
 import MainStack from './src/routes/MainStack';
 import {store} from './src/redux/store.config';
 import {PaperProvider} from 'react-native-paper';
+import {ActionSheetProvider} from '@expo/react-native-action-sheet';
 
 export default function App() {
   return (
-    <PaperProvider>
-      <Provider store={store}>
-        <NavigationContainer>
-          <MainStack />
-        </NavigationContainer>
-      </Provider>
-    </PaperProvider>
+    <ActionSheetProvider>
+      <PaperProvider>
+        <Provider store={store}>
+          <NavigationContainer>
+            <MainStack />
+          </NavigationContainer>
+        </Provider>
+      </PaperProvider>
+    </ActionSheetProvider>
   );
 }

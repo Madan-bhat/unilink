@@ -1,7 +1,6 @@
-import {View} from 'react-native';
+import {Dimensions, View} from 'react-native';
 import React, {useCallback, useEffect, useState} from 'react';
 import Text from '../../ui/Text';
-import Input from '../../ui/Input';
 import {FlashList} from '@shopify/flash-list';
 import firestore from '@react-native-firebase/firestore';
 import {user} from '../../utils/user';
@@ -18,7 +17,6 @@ export default function Requests() {
         .onSnapshot(data => {
           let userData = data.data();
           setRequests(userData?.requests);
-          console.log(userData?.requests);
         });
     } catch (e) {}
   }, []);
@@ -35,6 +33,15 @@ export default function Requests() {
         </Text>
         <View className="h-full w-full">
           <FlashList
+            ListEmptyComponent={
+              <View
+                style={{height: Dimensions.get('window').height / 1.2}}
+                className="justify-center flex-1 items-center">
+                <Text className="text-xl text-slate-900 font-sans-bold">
+                  No Requests Available
+                </Text>
+              </View>
+            }
             className="flex flex-1 h-full"
             estimatedItemSize={200}
             data={userRequests}

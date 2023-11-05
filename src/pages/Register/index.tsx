@@ -1,6 +1,8 @@
 import {View, TouchableOpacity, Alert} from 'react-native';
 import React, {useCallback, useState} from 'react';
+import * as Animatable from 'react-native-animatable';
 import Text from '../../ui/Text';
+
 import AntDesign from 'react-native-vector-icons/AntDesign';
 import Modal from '../../ui/Modal';
 import {Portal, TextInput} from 'react-native-paper';
@@ -9,9 +11,11 @@ import Image from '../../ui/Image';
 import ImageCropPicker from 'react-native-image-crop-picker';
 import {useRegisterMutation} from '../../redux/apis/login.api';
 import {validateRegistrationUser} from '../../utils/validateUser';
+import ActivityIndicator from '../../ui/ActivityIndicator';
 
 export default function Register() {
   const [register, {error}] = useRegisterMutation();
+  const [loading, setLoading] = useState(false);
   const [userInfo, setUserInfo] = useState<{
     email: string;
     userName: string;
@@ -32,8 +36,10 @@ export default function Register() {
   }, [userInfo]);
 
   const handleRegister = useCallback(() => {
+    setLoading(!loading);
     register(userInfo);
-  }, [register, userInfo]);
+    setLoading(!loading);
+  }, [loading, register, userInfo]);
 
   const takePhotoFromCamera = () => {
     ImageCropPicker.openCamera({
@@ -115,8 +121,9 @@ export default function Register() {
         <Input
           value={userInfo.userName}
           onChangeText={val => handleInputChange('userName', val)}
-          left={<TextInput.Icon icon={'nature-people'} />}
+          left={<TextInput.Icon color={'black'} icon={'nature-people'} />}
           cursorColor="black"
+          textColor="black"
           placeholder="Username"
           className="bg-white font-sans-bold "
           underlineColor="white"
@@ -125,8 +132,9 @@ export default function Register() {
         <Input
           value={userInfo.email}
           onChangeText={val => handleInputChange('email', val)}
-          left={<TextInput.Icon icon={'email'} />}
+          left={<TextInput.Icon color={'black'} icon={'email'} />}
           cursorColor="black"
+          textColor="black"
           placeholder="Email"
           className="bg-white font-sans-bold "
           underlineColor="white"
@@ -135,8 +143,9 @@ export default function Register() {
         <Input
           value={userInfo.password}
           onChangeText={val => handleInputChange('password', val)}
-          left={<TextInput.Icon icon={'eye'} />}
+          left={<TextInput.Icon color={'black'} icon={'eye'} />}
           cursorColor="black"
+          textColor="black"
           placeholder="Password"
           className="bg-white"
           underlineColor="white"
@@ -148,12 +157,18 @@ export default function Register() {
             isUserInfoValid.errors.password ||
             isUserInfoValid.errors.userName}
         </Text>
-        <TouchableOpacity
-          disabled={!isUserInfoValid.isValid}
-          onPress={handleRegister}
-          className="bg-slate-900 mt-8 self-end p-4 rounded-full">
-          <AntDesign name="right" size={24} color={'white'} />
-        </TouchableOpacity>
+        <Animatable.View duration={5000} animation={'bounceInRight'}>
+          <TouchableOpacity
+            disabled={!isUserInfoValid.isValid}
+            onPress={handleRegister}
+            className="bg-slate-900 mt-8 self-end p-4 rounded-full">
+            {loading ? (
+              <ActivityIndicator color={'white'} />
+            ) : (
+              <AntDesign name="right" size={24} color={'white'} />
+            )}
+          </TouchableOpacity>
+        </Animatable.View>
       </View>
     </View>
   );

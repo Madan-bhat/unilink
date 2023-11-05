@@ -10,4 +10,5 @@ export enum ScreenNames {
   chats = 'chats',
   search = 'search',
   imageView = 'imageView',
+  editprofile = 'editprofile',
 }

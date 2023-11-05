@@ -20,7 +20,7 @@ export default function ChatList({item}: any) {
   const getUnreadMessage = useCallback(() => {
     try {
       firestore()
-        .collection('chats')
+        .collection('chatRoom')
         .doc(docid)
         .collection('messages')
         .onSnapshot(querySnapshot => {
@@ -39,19 +39,17 @@ export default function ChatList({item}: any) {
 
   const getLatestMessage = useCallback(async () => {
     try {
-      const latestMessages = [];
       const querySnapshot = await firestore()
-        .collection('chats')
+        .collection('chatRoom')
         .doc(docid)
         .collection('messages')
-        .orderBy('date', 'desc')
+        .orderBy('createdAt', 'desc')
         .limit(1);
 
       querySnapshot.onSnapshot(data => {
         data?.forEach(doc => {
           const _latestMessage = doc.data();
-          setLatestMessage(_latestMessage?.messageText);
-          latestMessages.push(_latestMessage);
+          setLatestMessage(_latestMessage);
         });
       });
     } catch (error) {}
@@ -67,7 +65,7 @@ export default function ChatList({item}: any) {
   }, [item]);
 
   const handleChatScreenNavigation = useCallback(() => {
-    navigation.navigate(ScreenNames.chat, {
+    return navigation.navigate(ScreenNames.chat, {
       user: {
         uid: item,
       },
@@ -107,7 +105,7 @@ export default function ChatList({item}: any) {
               numberOfLines={1}
               ellipsizeMode="tail"
               className="text-slate-900 font-sans max-w-[240px]">
-              {latestMessage || 'No Description'}
+              {latestMessage?.text || 'No Description'}
             </Text>
           </View>
         </View>

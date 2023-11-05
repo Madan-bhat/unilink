@@ -18,7 +18,7 @@ export default function Search() {
   let filteredData = users.filter(item => {
     return (
       item?.userName?.toLowerCase()?.includes(username.toLowerCase()) &&
-      !acceptedRequests.includes(item?.uid)
+      (acceptedRequests ? !acceptedRequests.includes(item?.uid) : true)
     );
   });
 
@@ -87,9 +87,9 @@ export default function Search() {
           className="bg-slate-900 mt-2 text-white color-white rounded-full"
           left={<TextInput.Icon color={'white'} icon={'account-search'} />}
         />
-        <View className="h-full w-full">
+        <View className="h-5/6 w-full">
           <FlashList
-            className="flex flex-1 h-full"
+            showsVerticalScrollIndicator={false}
             estimatedItemSize={200}
             data={filteredData}
             renderItem={({item}) => <UsersList item={item} />}

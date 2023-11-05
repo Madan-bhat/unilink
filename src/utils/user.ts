@@ -1,5 +1,5 @@
 import auth from '@react-native-firebase/auth';
 
-let user = auth()?.currentUser;
+let user: any = auth()?.currentUser;
 
 export {user};

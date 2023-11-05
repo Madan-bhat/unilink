@@ -6,7 +6,10 @@ import {chat} from './apis/chat.api';
 
 export const store = configureStore({
   reducer: reducers,
-  middleware: gDM => gDM().concat(login.middleware, chat.middleware),
+  middleware: gDM =>
+    gDM({
+      serializableCheck: false,
+    }).concat(login.middleware, chat.middleware),
 });
 
 setupListeners(store.dispatch);

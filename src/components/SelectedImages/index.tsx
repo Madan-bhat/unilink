@@ -16,11 +16,13 @@ interface ISelectedImages {
   onEmojiSelect: (prop: any) => any;
   onEmojiBoardOpen: () => void;
   onClose: any;
+  isImageUploading: boolean;
 }
 
 export default function SelectedImages({
   image,
   visible,
+  isImageUploading,
   onChange,
   text,
   onSend,
@@ -41,16 +43,20 @@ export default function SelectedImages({
           <Image
             className="h-4/6 w-full"
             resizeMode="contain"
-            source={{uri: 'data:image/png;base64,' + image}}
+            source={{uri: image}}
           />
           <ChatInput
+            disabled={
+              image || !text?.replace(/\s/g, '').length > 0 ? false : true
+            }
             onChange={onChange}
             onSend={onSend}
             text={text}
+            isImageUploading={isImageUploading}
             onEmojiBoardOpen={onEmojiBoardOpen}
             isEmojiBoardVisible={isEmojiBoardVisible}
             onEmojiSelect={onEmojiSelect}
-            showSelectImage={false}
+            showSelectImage={true}
           />
         </View>
       </Modal>

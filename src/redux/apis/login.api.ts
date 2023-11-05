@@ -47,6 +47,7 @@ export const login = createApi({
                 .set({
                   uid: user?.uid,
                   userName,
+                  email,
                   groups: [],
                   chats: [],
                   token: '',

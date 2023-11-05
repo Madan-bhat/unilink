@@ -11,12 +11,10 @@ export default function ImageView({image, visible, handleClose}: any) {
   const localFilePath = `${RNFetchBlob.fs.dirs.DownloadDir}/${Date.now()}.png`;
 
   const downloadBase64Image = () => {
-    console.log('ree');
     return new Promise((resolve, reject) => {
       RNFetchBlob.fs
         .writeFile(localFilePath, image, 'base64')
         .then(() => {
-          console.log('Image downloaded successfully');
           resolve(localFilePath);
         })
         .then(() => {
