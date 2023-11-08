@@ -24,35 +24,6 @@ export default function EditProfile() {
     phone_number: '',
   });
 
-  const {showActionSheetWithOptions} = useActionSheet();
-  const onPress = () => {
-    const options = ['Choose From Library', 'Open Camera', 'Cancel'];
-    const cancelButtonIndex = 2;
-
-    showActionSheetWithOptions(
-      {
-        options,
-        cancelButtonIndex,
-      },
-      (selectedIndex: number) => {
-        switch (selectedIndex) {
-          case 1:
-            takePhotoFromCamera();
-
-            break;
-
-          case 2:
-            choosePhotoFromLibrary();
-
-            break;
-
-          case cancelButtonIndex:
-          // Canceled
-        }
-      },
-    );
-  };
-
   const takePhotoFromCamera = () => {
     ImageCropPicker.openCamera({
       includeBase64: true,
@@ -60,17 +31,51 @@ export default function EditProfile() {
       compressImageQuality: 0.5,
     }).then((_image: any) => {
       setImage(`data:image/png;base64,${_image.data}`);
+      setUser({
+        ...user,
+        userImg: `data:image/png;base64,${_image.data}`,
+      });
     });
   };
 
-  const choosePhotoFromLibrary = () => {
+  const choosePhotoFromLibrary = useCallback(() => {
+    console.log('pressed');
     ImageCropPicker.openPicker({
       compressImageQuality: 0.5,
       includeBase64: true,
       cropping: true,
     }).then((_image: any) => {
       setImage(`data:image/png;base64,${_image.data}`);
+      setUser({
+        ...user,
+        userImg: `data:image/png;base64,${_image.data}`,
+      });
     });
+  }, [user]);
+
+  const {showActionSheetWithOptions} = useActionSheet();
+  const onPress = () => {
+    const options = ['Open Camera', 'Choose From Library', 'Cancel'];
+    const cancelButtonIndex = 2;
+
+    showActionSheetWithOptions(
+      {
+        options,
+        cancelButtonIndex,
+      },
+      (selectedIndex: any) => {
+        switch (selectedIndex) {
+          case 0:
+            takePhotoFromCamera();
+            break;
+          case 1:
+            choosePhotoFromLibrary();
+            break;
+          case cancelButtonIndex:
+          // Canceled
+        }
+      },
+    );
   };
 
   const areFieldsNotEmpty = useCallback(
@@ -172,7 +177,13 @@ export default function EditProfile() {
           <Image
             resizeMode="contain"
             className="h-44 w-44 rounded-full"
-            source={{uri: currentUser?.userImg || image || PLACEHOLDER_IMG}}
+            source={{
+              uri: image
+                ? image
+                : (currentUser?.userImg === ''
+                    ? image
+                    : currentUser?.userImg) || PLACEHOLDER_IMG,
+            }}
           />
           <View className="bg-white border-[5px] border-primary border-solid absolute bottom-1 right-2 p-2 h-12 w-12 items-center justify-center rounded-full">
             <TouchableOpacity onPress={onPress}>

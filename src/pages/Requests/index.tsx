@@ -26,23 +26,24 @@ export default function Requests() {
   }, [getRequests]);
 
   return (
-    <View className="bg-white flex-1 p-4">
+    <View className="bg-primary pb-24 flex-1 p-4">
       <View className="flex justify-between ">
-        <Text className="mt-2 font-sans-bold text-slate-900 mt-4 text-4xl">
+        <Text className=" font-sans-bold text-white mt-4 text-4xl">
           Requests
         </Text>
-        <View className="h-full w-full">
+        <View className="h-full pb-48 mt-5 w-full">
           <FlashList
+            showsVerticalScrollIndicator={false}
             ListEmptyComponent={
               <View
                 style={{height: Dimensions.get('window').height / 1.2}}
                 className="justify-center flex-1 items-center">
-                <Text className="text-xl text-slate-900 font-sans-bold">
+                <Text className="text-xl text-white font-sans-bold">
                   No Requests Available
                 </Text>
               </View>
             }
-            className="flex flex-1 h-full"
+            className="flex flex-1 "
             estimatedItemSize={200}
             data={userRequests}
             renderItem={({item}) => <RequestLists item={item} />}

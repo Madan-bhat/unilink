@@ -74,18 +74,16 @@ export default function Search() {
   }, [getAcceptedRequests, getUsers]);
 
   return (
-    <View className="bg-white flex-1 p-4">
+    <View className="bg-primary flex-1 p-4">
       <View className="flex justify-between ">
-        <Text className="font-sans-bold text-slate-900 mt-4 text-4xl">
-          Search
-        </Text>
+        <Text className="font-sans-bold text-white mt-4 text-4xl">Search</Text>
         <Input
           onChangeText={val => handleChangeInSearch(val)}
-          textColor="white"
-          placeholderTextColor={'white'}
+          textColor="black"
+          placeholderTextColor={'black'}
           placeholder="Search"
-          className="bg-slate-900 mt-2 text-white color-white rounded-full"
-          left={<TextInput.Icon color={'white'} icon={'account-search'} />}
+          className="bg-white mt-2 text-black color-white rounded-full"
+          left={<TextInput.Icon color={'black'} icon={'account-search'} />}
         />
         <View className="h-5/6 w-full">
           <FlashList

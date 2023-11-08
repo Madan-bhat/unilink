@@ -32,7 +32,7 @@ function ChatInput({
 }: IChatInput) {
   const {showActionSheetWithOptions} = useActionSheet();
   const onPress = () => {
-    const options = ['Choose From Library', 'Open Camera', 'Cancel'];
+    const options = ['Open Camera', 'Choose From Library', 'Cancel'];
     const cancelButtonIndex = 2;
 
     showActionSheetWithOptions(
@@ -40,18 +40,14 @@ function ChatInput({
         options,
         cancelButtonIndex,
       },
-      (selectedIndex: number) => {
+      (selectedIndex: any) => {
         switch (selectedIndex) {
-          case 1:
+          case 0:
             openCamera();
-
             break;
-
-          case 2:
+          case 1:
             openLibrary();
-
             break;
-
           case cancelButtonIndex:
           // Canceled
         }
@@ -89,7 +85,7 @@ function ChatInput({
             className={
               disabled
                 ? 'bg-slate-500 shadow-lg shadow-slate-500 rounded-full p-3'
-                : 'bg-black shadow-lg shadow-slate-800 rounded-full p-3'
+                : 'bg-primary shadow-lg shadow-slate-800 rounded-full p-3'
             }>
             {isImageUploading ? (
               <ActivityIndicator color="white" />

@@ -23,12 +23,13 @@ export default function TabStack() {
           borderRadius: 50,
           bottom: 4,
           elevation: 100,
+          backgroundColor: '#0c0c0c',
           position: 'absolute',
           borderTopWidth: 0.5,
-          borderColor: '#8491b0',
+          borderColor: 'rgba(255,2555,255,0.2)',
         },
         tabBarShowLabel: false,
-        tabBarActiveTintColor: '#0f172a',
+        tabBarActiveTintColor: 'white',
       }}>
       <Tab.Screen
         options={{

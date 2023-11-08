@@ -22,7 +22,6 @@ export default function Chat() {
   const currentUser = useSelector(
     (state: {user: any}) => state?.user?.currentUser,
   );
-  const dispatch = useDispatch();
   const [messages, setMessages] = useState<any>([]);
   const [lastVisible, setLastVisible] = useState<any>(null);
   const [isImageUploading, setImageUploading] = useState(false);
@@ -31,6 +30,7 @@ export default function Chat() {
   const [text, setText] = useState('');
   const [image, setImage] = useState('');
   const [selectedImageModalVisible, setSelectedImageModal] = useState(false);
+  const [pagelimit, setPageLimit] = useState(10);
 
   const {params} = useRoute();
   const {user}: any = params;
@@ -60,7 +60,6 @@ export default function Chat() {
 
         await ref.put(blob);
         const url = await ref.getDownloadURL();
-        console.log('Image uploaded successfully. URL:', url);
 
         return url;
       } catch (error) {
@@ -146,24 +145,19 @@ export default function Chat() {
   }, [chatUser?.token, currentUser]);
 
   const loadMoreMessages = useCallback(() => {
-    let PAGE_SIZE = 3; // Number of messages to load per page
-
+    let PAGE_SIZE = 3;
     if (loading) {
       return;
     }
-
     setLoading(true);
-
     if (!lastVisible) {
       setLoading(false);
       return;
     }
-
     const docId =
       user.uid > currentUser.uid
         ? `${currentUser.uid}-${user.uid}`
         : `${user.uid}-${currentUser.uid}`;
-
     let messageRef = firestore()
       .collection('chatRoom')
       .doc(docId)
@@ -171,24 +165,21 @@ export default function Chat() {
       .orderBy('createdAt', 'desc')
       .startAfter(lastVisible)
       .limit(PAGE_SIZE);
-
     try {
       messageRef.get().then(querySnapshot => {
-        PAGE_SIZE = querySnapshot.docs.length;
         const newMessages = querySnapshot.docs.map(docSnapshot => {
           const data = docSnapshot.data();
-
           const createdAt =
             data.createdAt && data.createdAt.toDate
               ? data.createdAt.toDate()
               : new Date();
-
           return {
             ...data,
+            received: data?.readBy?.includes(chatUser?.uid),
             createdAt,
           };
         });
-
+        setPageLimit(pagelimit + PAGE_SIZE);
         setMessages((prevMessages: any) => [...prevMessages, ...newMessages]);
         if (querySnapshot.docs.length > 0) {
           setLastVisible(querySnapshot.docs[querySnapshot.docs.length - 1]);
@@ -201,11 +192,16 @@ export default function Chat() {
       console.error('Error fetching more messages:', error);
       setLoading(false);
     }
-  }, [currentUser, user, loading, lastVisible]);
+  }, [
+    loading,
+    lastVisible,
+    user.uid,
+    currentUser.uid,
+    pagelimit,
+    chatUser?.uid,
+  ]);
 
   const getInitialMessages = useCallback(() => {
-    let PAGE_SIZE = 10; // Number of messages to load per page
-
     if (loading) {
       return;
     }
@@ -218,7 +214,7 @@ export default function Chat() {
       .doc(docId)
       .collection('messages')
       .orderBy('createdAt', 'desc')
-      .limit(PAGE_SIZE);
+      .limit(pagelimit);
 
     try {
       messageRef.onSnapshot(querySnapshot => {
@@ -232,6 +228,7 @@ export default function Chat() {
 
           return {
             ...data,
+            received: data?.readBy?.includes(chatUser?.uid),
             createdAt,
           };
         });
@@ -244,11 +241,11 @@ export default function Chat() {
     } catch (error) {
       console.error('Error fetching messages:', error);
     }
-  }, [currentUser, user, loading]);
+  }, [loading, user.uid, currentUser.uid, pagelimit, chatUser?.uid]);
+
   useEffect(() => {
     getInitialMessages();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [getInitialMessages]);
 
   const onSend = useCallback(
     async (message: any = []) => {
@@ -258,10 +255,9 @@ export default function Chat() {
           : user?.uid + '-' + currentUser?.uid;
 
       try {
-        let url: any = ''; // Initialize url to an empty string
-
+        let url: any = '';
         if (image) {
-          url = await uploadImage(); // Await the image upload and get the URL
+          url = await uploadImage();
         }
 
         const createdAt = new Date();
@@ -273,7 +269,7 @@ export default function Chat() {
           text: message[0]?.text || text,
           sentBy: currentUser?.uid,
           sentTo: user?.uid,
-          image: url, // Use the URL obtained from the image upload
+          image: url,
           liked: false,
           user: {
             _id: currentUser.uid,
@@ -290,13 +286,13 @@ export default function Chat() {
 
         setText('');
         setImage('');
-        setImageUploading(!isImageUploading);
 
         if (selectedImageModalVisible) {
           handleToggleSelectedImageModal();
         }
 
         sendPushNotification();
+        setImageUploading(!isImageUploading);
       } catch (error) {
         console.error('Error sending message:', error);
       }
@@ -343,7 +339,7 @@ export default function Chat() {
   }, [getChatUser, updateReadMessage]);
 
   return (
-    <View className="flex h-full bg-black">
+    <View className="flex h-full bg-primary">
       <ChatHeader user={chatUser} />
       <View className="h-full rounded-t-[40px] bg-white flex-1">
         <Messages

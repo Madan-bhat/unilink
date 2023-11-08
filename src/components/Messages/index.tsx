@@ -1,20 +1,14 @@
 import React from 'react';
-import {Dimensions, TouchableOpacity, View} from 'react-native';
+import {Dimensions, View} from 'react-native';
 
-import AntDesign from 'react-native-vector-icons/AntDesign';
-import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import {
-  Actions,
   Bubble,
-  Composer,
   Day,
   GiftedChat,
-  InputToolbar,
   LoadEarlier,
   MessageImage,
   MessageText,
 } from 'react-native-gifted-chat';
-import Input from '../../ui/Input';
 import ChatInput from '../ChatInput';
 
 interface IMessages {
@@ -25,47 +19,28 @@ interface IMessages {
   onSend: any;
   currentUser: any;
   text: string;
+  openCamera: () => void;
+  openLibrary: () => void;
+  handleInputChange: (props: string) => void;
+  loadMore: () => void;
   onLike: (props: string) => void;
 }
 
 function Messages({
   messages,
   openCamera,
-  handleInputChange,
   openLibrary,
+  handleInputChange,
   currentUser,
   text,
   onSend,
   loading,
   loadMore,
-}: any) {
-  function renderActions(props) {
-    return (
-      <Actions
-        {...props}
-        options={{
-          ['Pick Image From Library']: openLibrary,
-          ['Camera']: openCamera,
-        }}
-        icon={props => (
-          <>
-            <TouchableOpacity
-              className={
-                'bg-transparent shadow-lg  rounded-full items-center justify-center h-7 w-7'
-              }>
-              <AntDesign name={'camerao'} size={24} color={'white'} />
-            </TouchableOpacity>
-          </>
-        )}
-        onSend={args => onSend(args)}
-      />
-    );
-  }
-
+}: IMessages) {
   return (
-    <View className="h-full flex-[10] rouned-t-[35px] bg-black">
-      <View className=" rounded-t-[40px] h-full overflow-hidden bg-black">
-        <View className=" h-full shadow-slate-900 bg-black-900 overflow-hidden ">
+    <View className="h-full flex-[10] rouned-t-[35px] bg-primary">
+      <View className=" rounded-t-[40px] h-full overflow-hidden bg-primary">
+        <View className=" h-full shadow-slate-900 bg-primary overflow-hidden ">
           <GiftedChat
             onInputTextChanged={val => handleInputChange(val)}
             showUserAvatar={false}
@@ -111,7 +86,7 @@ function Messages({
                   borderStyle: 'solid',
                   borderColor: 'rgba(255, 255, 255, 0.4)',
                   borderWidth: 0.2,
-                  backgroundColor: 'black',
+                  backgroundColor: '#171918',
                   marginBottom: 4,
                   padding: 6,
                 }}
@@ -125,6 +100,8 @@ function Messages({
                   openLibrary={openLibrary}
                   onChange={handleInputChange}
                   onSend={onSend}
+                  showSelectImage={false}
+                  isImageUploading={false}
                 />
               </>
             )}
@@ -139,7 +116,7 @@ function Messages({
                     right: {
                       padding: 6,
                       marginTop: 4,
-                      shadowColor: '#0f172a',
+                      shadowColor: '#0a0a0a',
                       elevation: 14,
                       backgroundColor: 'rgba(162, 164, 171, 0.4)',
                     },
@@ -147,7 +124,7 @@ function Messages({
                       borderStyle: 'solid',
                       borderColor: 'rgba(255, 255, 255, 0.4)',
                       borderWidth: 0.2,
-                      backgroundColor: 'black',
+                      backgroundColor: '#0a0a0a',
                       marginBottom: 4,
                       padding: 6,
                     },

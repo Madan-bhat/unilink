@@ -27,7 +27,6 @@ export default function Loading() {
           messaging()
             .getToken()
             .then(fcm => {
-              console.log(fcm);
               firestore().collection('users').doc(user?.uid).update({
                 token: fcm,
               });

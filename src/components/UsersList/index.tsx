@@ -50,7 +50,6 @@ function UsersList({item}: any) {
     }).then(_response => {
       return _response?.json();
     });
-    console.log(response);
   }, [item?.token, item?.userName]);
 
   const onRequest = useCallback(() => {
@@ -83,7 +82,7 @@ function UsersList({item}: any) {
   }, [getRequestedList]);
 
   return (
-    <View className="bg-white-900 p-2 rounded-md bg-white my-2 w-full">
+    <View className="bg-white-900 p-2 rounded-md bg-primary my-2 w-full">
       <View className="flex-row items-center justify-between">
         <View className="items-center flex-row">
           <Image
@@ -97,7 +96,7 @@ function UsersList({item}: any) {
           <View className="ml-2">
             <Text
               ellipsizeMode="tail"
-              className="text-slate-900 max-w-[240px] text-lg font-sans">
+              className="text-white max-w-[px] text-lg font-sans">
               {item.userName}
             </Text>
             <Text>{item?.description || 'No Description'}</Text>
@@ -106,8 +105,8 @@ function UsersList({item}: any) {
 
         <TouchableOpacity
           onPress={onRequest}
-          className="mr-0 p-1 px-2 rounded-md items-center justify-center bg-slate-900">
-          <Text className="text-md text-white font-sans">
+          className="mr-0 p-1 px-2 rounded-md items-center justify-center bg-white">
+          <Text className="text-md text-primary font-sans">
             {requested ? 'Cancel Request' : 'Request'}
           </Text>
         </TouchableOpacity>

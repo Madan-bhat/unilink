@@ -46,8 +46,6 @@ export default function RequestLists({item}: any) {
             chats: firestore.FieldValue.arrayUnion(user?.uid),
           }),
       ]);
-
-      console.log('Request accepted successfully.');
     } catch (error) {
       console.error('Error accepting request:', error);
     }
@@ -68,7 +66,7 @@ export default function RequestLists({item}: any) {
   }, [getUserDetail]);
 
   return (
-    <View className="bg-white-900 p-2 rounded-md bg-white my-2 w-full">
+    <View className=" p-2 rounded-md bg-primary mt-2 w-full">
       <View className="flex-row items-center justify-between">
         <View className="items-center flex-row">
           <Image
@@ -80,7 +78,7 @@ export default function RequestLists({item}: any) {
             className="h-12 rounded-full w-12"
           />
           <View className="ml-3">
-            <Text className="text-slate-900 text-lg font-sans">
+            <Text className="text-white text-lg font-sans">
               {users?.userName}
             </Text>
             <Text>{users?.description || 'No Description'}</Text>

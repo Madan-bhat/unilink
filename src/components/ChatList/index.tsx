@@ -98,13 +98,13 @@ export default function ChatList({item}: any) {
             />
           </View>
           <View className="ml-3">
-            <Text className="text-slate-900 text-lg font-sans">
+            <Text className="text-white text-lg font-sans">
               {users?.userName}
             </Text>
             <Text
               numberOfLines={1}
               ellipsizeMode="tail"
-              className="text-slate-900 font-sans max-w-[240px]">
+              className="text-white font-sans max-w-[240px]">
               {latestMessage?.text || 'No Description'}
             </Text>
           </View>

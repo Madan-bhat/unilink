@@ -31,8 +31,6 @@ export default function Profile() {
       });
   };
 
-  console.log(currentUser);
-
   const handleLogOut = useCallback(() => {
     auth().signOut();
     navigation.replace(ScreenNames.login);

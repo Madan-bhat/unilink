@@ -74,7 +74,7 @@ export default function Chats() {
   };
 
   return (
-    <View className="bg-slate-900 flex-1">
+    <View className="bg-black flex-1">
       <View className="flex-row justify-between p-4 items-center">
         <Text className="mt-2 text-white font-sans-bold text-4xl">
           Messages
@@ -87,7 +87,7 @@ export default function Chats() {
           </TouchableOpacity>
         </View>
       </View>
-      <View className="h-full p-4 bg-white rounded-t-3xl w-full mt-4">
+      <View className="h-full p-4 bg-primary rounded-t-3xl w-full mt-4">
         <FlashList
           ListEmptyComponent={
             <View
