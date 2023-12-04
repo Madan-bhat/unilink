@@ -10,9 +10,54 @@ import {
   MessageText,
 } from 'react-native-gifted-chat';
 import ChatInput from '../ChatInput';
+import Text from '../../ui/Text';
+
+const chatComponentsStyles = {
+  loadEarlierStyles: {
+    borderStyle: 'solid',
+    borderColor: 'rgba(255, 255, 255, 0.4)',
+    borderWidth: 0.2,
+    backgroundColor: '#171918',
+    marginBottom: 4,
+    padding: 4,
+  },
+  chatBubble: {
+    right: {
+      padding: 4,
+      marginTop: 4,
+      shadowColor: '#0a0a0a',
+      elevation: 14,
+      backgroundColor: 'rgba(162, 164, 171, 0.4)',
+    },
+    left: {
+      borderStyle: 'solid',
+      borderColor: 'rgba(255, 255, 255, 0.4)',
+      borderWidth: 0.2,
+      backgroundColor: '#0a0a0a',
+      marginBottom: 4,
+      padding: 4,
+    },
+  },
+  dateStyles: {
+    fontFamily: 'Poppins-Bold',
+    color: 'rgba(255, 255, 255, 0.8)',
+    fontSize: 14,
+  },
+  listViewProps: {
+    showsVerticalScrollIndicator: false,
+    marginBottom: 25,
+  },
+  imageStyles: {
+    width: Dimensions.get('window').width / 1.5,
+    height: Dimensions.get('window').height / 4.5,
+  },
+  textStyles: {
+    color: 'white',
+    fontFamily: 'Poppins-Regular',
+  },
+};
 
 interface IMessages {
-  onEndReached: () => void;
   messages: any;
   loading: boolean;
   chatUser: any;
@@ -45,51 +90,36 @@ function Messages({
             onInputTextChanged={val => handleInputChange(val)}
             showUserAvatar={false}
             renderMessageText={props => (
-              <MessageText
-                {...props}
-                textStyle={{
-                  color: 'white',
-                }}
-                customTextStyle={{
-                  color: 'white',
-                  fontFamily: 'Poppins-Regular',
-                }}
-              />
+              <>
+                <MessageText
+                  {...props}
+                  textStyle={{
+                    ...chatComponentsStyles.textStyles?.color,
+                  }}
+                  customTextStyle={{...chatComponentsStyles.textStyles}}
+                />
+                <Text>{props.currentMessage?.status}</Text>
+              </>
             )}
             renderMessageImage={props => {
               return (
                 <MessageImage
                   {...props}
                   imageStyle={{
-                    width: Dimensions.get('window').width / 1.5,
-                    height: Dimensions.get('window').height / 4.5,
+                    ...chatComponentsStyles.imageStyles,
                   }}
                 />
               );
             }}
             renderDay={props => {
               return (
-                <Day
-                  {...props}
-                  textStyle={{
-                    fontFamily: 'Poppins-Bold',
-                    color: 'rgba(255, 255, 255, 0.8)',
-                    fontSize: 14,
-                  }}
-                />
+                <Day {...props} textStyle={chatComponentsStyles?.dateStyles} />
               );
             }}
             renderLoadEarlier={props => (
               <LoadEarlier
                 {...props}
-                wrapperStyle={{
-                  borderStyle: 'solid',
-                  borderColor: 'rgba(255, 255, 255, 0.4)',
-                  borderWidth: 0.2,
-                  backgroundColor: '#171918',
-                  marginBottom: 4,
-                  padding: 6,
-                }}
+                wrapperStyle={chatComponentsStyles.loadEarlierStyles}
               />
             )}
             renderInputToolbar={props => (
@@ -113,29 +143,12 @@ function Messages({
                 <Bubble
                   {...props}
                   wrapperStyle={{
-                    right: {
-                      padding: 6,
-                      marginTop: 4,
-                      shadowColor: '#0a0a0a',
-                      elevation: 14,
-                      backgroundColor: 'rgba(162, 164, 171, 0.4)',
-                    },
-                    left: {
-                      borderStyle: 'solid',
-                      borderColor: 'rgba(255, 255, 255, 0.4)',
-                      borderWidth: 0.2,
-                      backgroundColor: '#0a0a0a',
-                      marginBottom: 4,
-                      padding: 6,
-                    },
+                    ...chatComponentsStyles.chatBubble,
                   }}
                 />
               );
             }}
-            listViewProps={{
-              showsVerticalScrollIndicator: false,
-              marginBottom: 25,
-            }}
+            listViewProps={chatComponentsStyles?.listViewProps}
             messages={messages}
             onSend={message => onSend(message)}
             user={{

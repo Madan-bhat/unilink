@@ -1,6 +1,8 @@
 import React, {useCallback, useEffect, useState} from 'react';
 import firestore from '@react-native-firebase/firestore';
 import storage from '@react-native-firebase/storage';
+import throttle from 'lodash/throttle';
+import debounce from 'lodash/debounce';
 
 import {View} from 'react-native';
 import {useRoute} from '@react-navigation/native';
@@ -22,6 +24,7 @@ export default function Chat() {
   const currentUser = useSelector(
     (state: {user: any}) => state?.user?.currentUser,
   );
+  const dispatch = useDispatch();
   const [messages, setMessages] = useState<any>([]);
   const [lastVisible, setLastVisible] = useState<any>(null);
   const [isImageUploading, setImageUploading] = useState(false);
@@ -36,13 +39,14 @@ export default function Chat() {
   const {user}: any = params;
 
   const getChatUser = useCallback(() => {
-    firestore()
+    const unsubscribe = firestore()
       .collection('users')
       .doc(user?.uid)
       .onSnapshot(_data => {
         setChatUser(_data?.data());
         dispatch(updateChatUser(_data?.data()));
       });
+    return () => unsubscribe();
   }, [dispatch, user?.uid]);
 
   const handleToggleSelectedImageModal = useCallback(() => {
@@ -90,26 +94,29 @@ export default function Chat() {
     });
   };
 
-  const updateReadMessage = useCallback(() => {
-    const docid =
-      user?.uid > currentUser?.uid
-        ? currentUser?.uid + '-' + user?.uid
-        : user?.uid + '-' + currentUser?.uid;
+  const updateReadMessage = useCallback(
+    debounce(() => {
+      const docid =
+        user?.uid > currentUser?.uid
+          ? currentUser?.uid + '-' + user?.uid
+          : user?.uid + '-' + currentUser?.uid;
 
-    try {
       let docRef = firestore()
         .collection('chatRoom')
         .doc(docid)
         .collection('messages');
-      docRef.get().then(querySnapshot => {
+      let unsubscribe = docRef.get().then(querySnapshot => {
         querySnapshot.forEach(doc => {
           docRef.doc(doc.id).update({
+            status: 'RECIEVED',
             readBy: firestore.FieldValue.arrayUnion(currentUser?.uid),
           });
         });
       });
-    } catch (error) {}
-  }, [currentUser?.uid, user?.uid]);
+      return () => unsubscribe;
+    }, 100),
+    [currentUser?.uid, user?.uid],
+  );
 
   const sendPushNotification = useCallback(async () => {
     const FIREBASE_API_KEY =
@@ -175,7 +182,6 @@ export default function Chat() {
               : new Date();
           return {
             ...data,
-            received: data?.readBy?.includes(chatUser?.uid),
             createdAt,
           };
         });
@@ -192,60 +198,57 @@ export default function Chat() {
       console.error('Error fetching more messages:', error);
       setLoading(false);
     }
-  }, [
-    loading,
-    lastVisible,
-    user.uid,
-    currentUser.uid,
-    pagelimit,
-    chatUser?.uid,
-  ]);
+  }, [loading, lastVisible, user.uid, currentUser.uid, pagelimit]);
 
-  const getInitialMessages = useCallback(() => {
-    if (loading) {
-      return;
-    }
-    const docId =
-      user.uid > currentUser.uid
-        ? `${currentUser.uid}-${user.uid}`
-        : `${user.uid}-${currentUser.uid}`;
-    let messageRef = firestore()
-      .collection('chatRoom')
-      .doc(docId)
-      .collection('messages')
-      .orderBy('createdAt', 'desc')
-      .limit(pagelimit);
+  const throttledGetInitialMessages = useCallback(
+    throttle(() => {
+      if (loading) {
+        return;
+      }
+      const docId =
+        user.uid > currentUser.uid
+          ? `${currentUser.uid}-${user.uid}`
+          : `${user.uid}-${currentUser.uid}`;
+      let messageRef = firestore()
+        .collection('chatRoom')
+        .doc(docId)
+        .collection('messages')
+        .orderBy('createdAt', 'desc')
+        .limit(pagelimit);
 
-    try {
-      messageRef.onSnapshot(querySnapshot => {
-        const newMessages = querySnapshot.docs.map(docSnapshot => {
-          const data = docSnapshot.data();
+      try {
+        messageRef.onSnapshot(querySnapshot => {
+          const newMessages = querySnapshot.docs.map(docSnapshot => {
+            const data = docSnapshot.data();
 
-          const createdAt =
-            data.createdAt && data.createdAt.toDate
-              ? data.createdAt.toDate()
-              : new Date();
+            const createdAt =
+              data.createdAt && data.createdAt.toDate
+                ? data.createdAt.toDate()
+                : new Date();
 
-          return {
-            ...data,
-            received: data?.readBy?.includes(chatUser?.uid),
-            createdAt,
-          };
+            return {
+              ...data,
+              received: data?.readBy?.includes(chatUser?.uid),
+              createdAt,
+            };
+          });
+
+          setMessages(newMessages);
+          if (querySnapshot.docs.length > 0) {
+            setLastVisible(querySnapshot.docs[querySnapshot.docs.length - 1]);
+          }
         });
-
-        setMessages(newMessages);
-        if (querySnapshot.docs.length > 0) {
-          setLastVisible(querySnapshot.docs[querySnapshot.docs.length - 1]);
-        }
-      });
-    } catch (error) {
-      console.error('Error fetching messages:', error);
-    }
-  }, [loading, user.uid, currentUser.uid, pagelimit, chatUser?.uid]);
+      } catch (error) {
+        console.error('Error fetching messages:', error);
+      }
+    }, 1000),
+    [loading, user.uid, currentUser.uid, pagelimit, chatUser?.uid],
+  );
 
   useEffect(() => {
-    getInitialMessages();
-  }, [getInitialMessages]);
+    throttledGetInitialMessages();
+    return throttledGetInitialMessages?.cancel;
+  }, [throttledGetInitialMessages]);
 
   const onSend = useCallback(
     async (message: any = []) => {
@@ -271,6 +274,7 @@ export default function Chat() {
           sentTo: user?.uid,
           image: url,
           liked: false,
+          status: 'SENT',
           user: {
             _id: currentUser.uid,
             avatar: chatUser?.userImg || PLACEHOLDER_IMG,
@@ -336,7 +340,7 @@ export default function Chat() {
   useEffect(() => {
     getChatUser();
     updateReadMessage();
-  }, [getChatUser, updateReadMessage]);
+  }, [updateReadMessage]);
 
   return (
     <View className="flex h-full bg-primary">

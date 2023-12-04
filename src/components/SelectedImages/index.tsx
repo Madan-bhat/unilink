@@ -12,9 +12,9 @@ interface ISelectedImages {
   text: string;
   onChange: (props: string) => void;
   onSend: () => void;
-  isEmojiBoardVisible: boolean;
-  onEmojiSelect: (prop: any) => any;
-  onEmojiBoardOpen: () => void;
+  isEmojiBoardVisible?: boolean;
+  onEmojiSelect?: (prop: any) => any;
+  onEmojiBoardOpen?: () => void;
   onClose: any;
   isImageUploading: boolean;
 }

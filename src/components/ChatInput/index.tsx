@@ -56,7 +56,7 @@ function ChatInput({
   };
   const _disabled = !text?.replace(/\s/g, '').length > 0 ? true : false;
   return (
-    <KeyboardAvoidingView className="flex-row bg-transparent absolute border-white rounded-full border-[0.5px] border-solid bottom-2 mx-2 self-center flex-[1]">
+    <KeyboardAvoidingView className="flex-row bg-transparent absolute border-white rounded-full border-[0.3px] border-solid bottom-2 mx-2 self-center flex-[1]">
       <View className="flex-row flex-1 max-h-14">
         <View className="flex-[18] ">
           <Input

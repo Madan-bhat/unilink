@@ -5,6 +5,7 @@ module.exports = {
     extend: {
       colors: {
         primary: '#0c0c0c',
+        chatBubbleBg: 'rgba(162, 164, 171, 0.4)',
       },
       fontFamily: {
         sans: [

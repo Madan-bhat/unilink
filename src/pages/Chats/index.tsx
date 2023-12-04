@@ -1,7 +1,6 @@
 import React, {useEffect, useState} from 'react';
 import firestore from '@react-native-firebase/firestore';
 import AntDesign from 'react-native-vector-icons/AntDesign';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import {FlashList} from '@shopify/flash-list';
 import {Dimensions, TouchableOpacity, View} from 'react-native';
@@ -20,48 +19,17 @@ export default function Chats() {
   useBackHandler();
 
   useEffect(() => {
-    const fetchAndSaveChats = async () => {
-      try {
-        const userDoc = await firestore()
-          .collection('users')
-          .doc(user?.uid)
-          .get();
-        const data = userDoc.data();
-        if (data) {
-          setUserChats(data.chats);
-          await AsyncStorage.setItem('chats', JSON.stringify(data.chats));
-        }
-      } catch (e) {
-        console.error('Error fetching and saving chats:', e);
-      }
-    };
-
     const subscribeToChatsChanges = () => {
       const userRef = firestore().collection('users').doc(user?.uid);
       const unsubscribe = userRef.onSnapshot(doc => {
         const data = doc.data();
         if (data) {
           setUserChats(data.chats);
-          AsyncStorage.setItem('chats', JSON.stringify(data.chats));
         }
       });
       return unsubscribe;
     };
 
-    const initializeChats = async () => {
-      try {
-        const localChats = await AsyncStorage.getItem('chats');
-        if (localChats) {
-          setUserChats(JSON.parse(localChats));
-        } else {
-          fetchAndSaveChats();
-        }
-      } catch (e) {
-        console.error('Error initializing chats:', e);
-      }
-    };
-
-    initializeChats();
     const unsubscribe = subscribeToChatsChanges();
 
     return () => {

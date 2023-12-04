@@ -3,7 +3,7 @@ import {createNativeStackNavigator} from '@react-navigation/native-stack';
 import messaging from '@react-native-firebase/messaging';
 import firestore from '@react-native-firebase/firestore';
 import {AppState} from 'react-native';
-import {useNavigation} from '@react-navigation/native';
+import {NavigationProp, useNavigation} from '@react-navigation/native';
 
 import TabStack from '../TabStack';
 import Login from '../../pages/Login';
@@ -18,7 +18,7 @@ import EditProfile from '../../pages/EditProfile';
 import {ScreenNames} from '../../utils/screenConfig';
 import {user} from '../../utils/user';
 
-const Stack = createNativeStackNavigator();
+const {Screen, Navigator} = createNativeStackNavigator();
 
 function MainStack() {
   const navigation = useNavigation();
@@ -35,8 +35,12 @@ function MainStack() {
     }
   });
 
-  const handleNotificationClick = (navigation, screenName, userId) => {
-    navigation.navigate(screenName, {
+  const handleNotificationClick = (
+    navigation: NavigationProp<ReactNavigation.RootParamList>,
+    screenName: any,
+    userId: any,
+  ) => {
+    return navigation.navigate(screenName, {
       user: {
         uid: userId,
       },
@@ -44,26 +48,38 @@ function MainStack() {
   };
 
   messaging().onNotificationOpenedApp(remoteMessage => {
-    if (remoteMessage.data.screen) {
+    if (remoteMessage?.data?.screen) {
       const {screen, userId}: any = remoteMessage.data;
       handleNotificationClick(navigation, screen, userId);
     }
   });
+
+  const screenConfig = {
+    [ScreenNames.loading]: Loading,
+    [ScreenNames.login]: Login,
+    [ScreenNames.register]: Register,
+    [ScreenNames.dashboard]: TabStack,
+    [ScreenNames.chat]: Chat,
+    [ScreenNames.search]: Search,
+    [ScreenNames.imageView]: ImageView,
+    [ScreenNames.editprofile]: EditProfile,
+  };
+
+  const screens = Object.keys(screenConfig).map((screenName: any) => ({
+    name: screenName,
+    component: screenConfig[screenName],
+  }));
+
   return (
-    <Stack.Navigator
+    <Navigator
       screenOptions={{
         animation: 'slide_from_right',
         headerShown: false,
       }}>
-      <Stack.Screen name={ScreenNames.loading} component={Loading} />
-      <Stack.Screen name={ScreenNames.login} component={Login} />
-      <Stack.Screen name={ScreenNames.register} component={Register} />
-      <Stack.Screen name={ScreenNames.dashboard} component={TabStack} />
-      <Stack.Screen name={ScreenNames.chat} component={Chat} />
-      <Stack.Screen name={ScreenNames.search} component={Search} />
-      <Stack.Screen name={ScreenNames.imageView} component={ImageView} />
-      <Stack.Screen name={ScreenNames.editprofile} component={EditProfile} />
-    </Stack.Navigator>
+      {screens?.map(screen => (
+        <Screen name={screen?.name} component={screen.component} />
+      ))}
+    </Navigator>
   );
 }
 

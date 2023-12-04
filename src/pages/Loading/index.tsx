@@ -1,9 +1,12 @@
-import {View, Text, PermissionsAndroid} from 'react-native';
 import React, {useEffect} from 'react';
-import {useNavigation} from '@react-navigation/native';
 import auth from '@react-native-firebase/auth';
 import messaging from '@react-native-firebase/messaging';
 import firestore from '@react-native-firebase/firestore';
+import PushNotification from 'react-native-push-notification';
+
+import {View, Text, PermissionsAndroid} from 'react-native';
+import {useNavigation} from '@react-navigation/native';
+
 import {ScreenNames} from '../../utils/screenConfig';
 import Image from '../../ui/Image';
 import {useDispatch} from 'react-redux';
@@ -16,6 +19,7 @@ export default function Loading() {
     PermissionsAndroid.request(
       PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS,
     );
+    PushNotification?.cancelAllLocalNotifications();
     setTimeout(() => {
       auth().onAuthStateChanged(user => {
         if (user) {
@@ -36,7 +40,7 @@ export default function Loading() {
           navigation.replace(ScreenNames.login);
         }
       });
-    }, 2000);
+    }, 1000);
   }, [dispatch, navigation]);
 
   return (
