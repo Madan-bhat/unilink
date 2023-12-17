@@ -17,6 +17,7 @@ import EditProfile from '../../pages/EditProfile';
 
 import {ScreenNames} from '../../utils/screenConfig';
 import {user} from '../../utils/user';
+import Information from '../../pages/Information';
 
 const {Screen, Navigator} = createNativeStackNavigator();
 
@@ -61,8 +62,9 @@ function MainStack() {
     [ScreenNames.dashboard]: TabStack,
     [ScreenNames.chat]: Chat,
     [ScreenNames.search]: Search,
-    [ScreenNames.imageView]: ImageView,
     [ScreenNames.editprofile]: EditProfile,
+    [ScreenNames.imageView]: ImageView,
+    [ScreenNames.information]: Information,
   };
 
   const screens = Object.keys(screenConfig).map((screenName: any) => ({

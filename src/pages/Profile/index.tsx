@@ -14,6 +14,11 @@ const PLACEHOLDER_IMG =
 export default function Profile() {
   const navigation = useNavigation();
   const currentUser = useSelector(state => state?.user?.currentUser);
+
+  const handleInformationPageNavigation = useCallback(() => {
+    navigation.navigate(ScreenNames?.information);
+  }, [navigation]);
+
   const openGmail = () => {
     const email = 'imadanbhat@gmail.com';
     const url = `mailto:${email}`;
@@ -60,7 +65,7 @@ export default function Profile() {
               {currentUser?.userName}
             </Text>
             <Text className="text-white text-xl font-sans">
-              {currentUser?.email || 'imadanbhat@gmail.com'}
+              {currentUser?.email || 'test@gmail.com'}
             </Text>
           </View>
           <TouchableOpacity
@@ -76,37 +81,19 @@ export default function Profile() {
         <View className="flex-row w-full items-center mt-8 justify-between">
           <View>
             <View className="flex-row items-center justify-center">
-              <View className="bg-white p-2 rounded-full">
-                <Ionicons name="information" size={28} color="black" />
+              <View className=" p-2 rounded-full">
+                <Ionicons name="information" size={28} color="white" />
               </View>
-              <Text className="text-xl font-sans-bold ml-4 text-white">
+              <Text className="text-lg font-sans-bold ml-4 text-white">
                 Information
               </Text>
             </View>
           </View>
-          <View className="bg-white p-2 rounded-full">
-            <AntDesign name="right" size={24} color="black" />
-          </View>
-        </View>
-        <View className="flex-row w-full items-center mt-8 justify-between">
-          <View>
-            <View className="flex-row items-center justify-center">
-              <View className="bg-white p-2 rounded-full">
-                <AntDesign name="contacts" size={28} color="black" />
-              </View>
-              <Text className="text-xl font-sans-bold ml-4 text-white">
-                Contact Me
-              </Text>
-            </View>
-          </View>
-          <View className="bg-white p-2 rounded-full">
-            <AntDesign
-              name="right"
-              onPress={() => openGmail()}
-              size={24}
-              color="black"
-            />
-          </View>
+          <TouchableOpacity
+            onPress={handleInformationPageNavigation}
+            className=" p-1 rounded-full">
+            <AntDesign name="right" size={16} color="white" />
+          </TouchableOpacity>
         </View>
       </View>
       <View className="items-center mt-5 rounded-full overflow-hidden">

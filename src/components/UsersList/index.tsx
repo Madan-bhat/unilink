@@ -24,7 +24,7 @@ function UsersList({item}: any) {
 
   const sendPushNotification = useCallback(async () => {
     const FIREBASE_API_KEY =
-      'AAAASrWqlck:APA91bH8W-DxSqP7XQZtQBK4B4PnjfpbKTPw5jOUab9L16j2Jx8kwumpY_uaJ2xbmL-9EavJeo_UPO6Mj7khQZ7FzL3efuWspwW0i3ob1ox_VNscP9vm-zXDWVoHq7qMg_tvJGm7wTxq';
+      'AAAAaSe6Jzk:APA91bFvk4flDI24veCqiDWnMFh_xDKmANQy2M0n0lfNVHdi9Qits1Un4crvhMMpNblesweZ5EDk66BkUlHG95Uh82cVjvy9jwLV89Bm6LmRIXLLz91g_F3AAszAL6-8o0hCrYApSArz';
     const message = {
       to: `${item?.token}`,
       notification: {

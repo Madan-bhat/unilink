@@ -64,7 +64,7 @@ export default function ChatList({item}: any) {
       });
   }, [item]);
 
-  const handleChatScreenNavigation = useCallback(() => {
+  const handlechatscreenNavigation = useCallback(() => {
     return navigation.navigate(ScreenNames.chat, {
       user: {
         uid: item,
@@ -80,7 +80,7 @@ export default function ChatList({item}: any) {
 
   return (
     <TouchableOpacity
-      onPress={handleChatScreenNavigation}
+      onPress={handlechatscreenNavigation}
       className="bg-white-900 mt-2 p-2 justify-between rounded-md my-2 w-full">
       <View className="flex-row items-center justify-between">
         <View className="items-center flex-row">

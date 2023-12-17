@@ -25,7 +25,7 @@ export default function Loading() {
         if (user) {
           const userRef = firestore().collection('users').doc(user?.uid);
           userRef.onSnapshot(data => {
-            dispatch(updateCurrentUser(data?.data()));
+            dispatch(updateCurrentUser(data.data()));
           });
           userRef.update({status: 'online'});
           messaging()
@@ -35,6 +35,8 @@ export default function Loading() {
                 token: fcm,
               });
             });
+          user.reload();
+          user.getIdToken(true);
           navigation.replace(ScreenNames.dashboard);
         } else {
           navigation.replace(ScreenNames.login);

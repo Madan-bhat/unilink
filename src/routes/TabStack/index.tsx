@@ -1,17 +1,39 @@
 import * as React from 'react';
-import {createMaterialBottomTabNavigator} from '@react-navigation/material-bottom-tabs';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import Profile from '../../pages/Profile';
 import Requests from '../../pages/Requests';
 import Chats from '../../pages/Chats';
 
+import {createMaterialBottomTabNavigator} from '@react-navigation/material-bottom-tabs';
+
 import {ScreenNames} from '../../utils/screenConfig';
-import Groups from '../../pages/Groups';
+import {useSelector} from 'react-redux';
+// !auth().currentUser?.emailVerified ? (
+//   <View className="bg-black flex-1 p-3 justify-center align-middle">
+//     <Text className="font-sans-bold text-white text-lg text-center">
+//       Please Verify Your Email before You Proceed
+//     </Text>
+//     <TouchableOpacity
+//       onPress={() => {
+//         auth().currentUser?.sendEmailVerification();
+//         ToastAndroid.show('Email Sent !', ToastAndroid.LONG);
+//       }}
+//       className="bg-white mx-8 rounded-full mt-3 p-3">
+//       <Text className="text-center font-sans text-md">
+//         Send Verification Email
+//       </Text>
+//     </TouchableOpacity>
+//   </View>
+// ) : (
 
 const Tab = createMaterialBottomTabNavigator();
 
 export default function TabStack() {
+  const currentUser = useSelector((state: any) => state?.user?.currentUser);
+  const showBadge = currentUser?.requests?.length > 0 && {
+    tabBarBadge: 0,
+  };
+
   return (
     <Tab.Navigator
       inactiveColor="white"
@@ -44,7 +66,7 @@ export default function TabStack() {
         name={ScreenNames.chats}
         component={Chats}
       />
-      <Tab.Screen
+      {/* <Tab.Screen
         options={{
           tabBarIcon(props) {
             return (
@@ -58,9 +80,10 @@ export default function TabStack() {
         }}
         name={ScreenNames.groups}
         component={Groups}
-      />
+      /> */}
       <Tab.Screen
         options={{
+          ...showBadge,
           tabBarIcon(props) {
             return (
               <Ionicons

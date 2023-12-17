@@ -1,13 +1,51 @@
 {
   "project_info": {
-    "project_number": "1037517850761",
-    "project_id": "unilink-751bd",
-    "storage_bucket": "unilink-751bd.appspot.com"
+    "project_number": "451638077241",
+    "project_id": "unilink-chat",
+    "storage_bucket": "unilink-chat.appspot.com"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:1037517850761:android:0d296c069b0f1b83c79e58",
+        "mobilesdk_app_id": "1:451638077241:android:cda53a56fec948d2d7aae8",
+        "android_client_info": {
+          "package_name": "com.example.unilink"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBsu78eoi8OxVnahHiMZ_DMeSN-ZsQkXq8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:451638077241:android:b92f5f4417c1143bd7aae8",
+        "android_client_info": {
+          "package_name": "com.tauseef.whatsappclone"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBsu78eoi8OxVnahHiMZ_DMeSN-ZsQkXq8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:451638077241:android:d553a49fce435203d7aae8",
         "android_client_info": {
           "package_name": "com.unilink"
         }
@@ -15,7 +53,7 @@
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyC7SbSNLtR7xUfsgdH2nGrck8EPy3J0rDA"
+          "current_key": "AIzaSyBsu78eoi8OxVnahHiMZ_DMeSN-ZsQkXq8"
         }
       ],
       "services": {

@@ -1,5 +1,6 @@
 import React, {useEffect, useState} from 'react';
 import firestore from '@react-native-firebase/firestore';
+import auth from '@react-native-firebase/auth';
 import AntDesign from 'react-native-vector-icons/AntDesign';
 
 import {FlashList} from '@shopify/flash-list';
@@ -12,26 +13,25 @@ import ChatList from '../../components/ChatList';
 import {ScreenNames} from '../../utils/screenConfig';
 import {user} from '../../utils/user';
 import {useBackHandler} from '../../hooks/useBackHandler';
+import VerificationBanner from '../../components/VerificationBanner';
 
 export default function Chats() {
-  const [userChats, setUserChats] = useState([]);
+  const [userchats, setUserchats] = useState([]);
   const navigation = useNavigation();
   useBackHandler();
 
   useEffect(() => {
-    const subscribeToChatsChanges = () => {
+    const subscribeTochatsChanges = () => {
       const userRef = firestore().collection('users').doc(user?.uid);
       const unsubscribe = userRef.onSnapshot(doc => {
         const data = doc.data();
         if (data) {
-          setUserChats(data.chats);
+          setUserchats(data.chats);
         }
       });
       return unsubscribe;
     };
-
-    const unsubscribe = subscribeToChatsChanges();
-
+    const unsubscribe = subscribeTochatsChanges();
     return () => {
       unsubscribe();
     };
@@ -55,8 +55,11 @@ export default function Chats() {
           </TouchableOpacity>
         </View>
       </View>
-      <View className="h-full p-4 bg-primary rounded-t-3xl w-full mt-4">
+      <View className="h-full overflow-hidden p-4 bg-primary rounded-t-3xl w-full mt-4">
+        {auth().currentUser?.emailVerified === false && <VerificationBanner />}
+
         <FlashList
+          estimatedItemSize={200}
           ListEmptyComponent={
             <View
               style={{height: Dimensions.get('window').height / 1.2}}
@@ -67,7 +70,7 @@ export default function Chats() {
             </View>
           }
           className="rounded-t-3xl"
-          data={userChats}
+          data={userchats}
           renderItem={({item}) => <ChatList item={item} />}
         />
       </View>

@@ -7,17 +7,20 @@ import Input from '../../ui/Input';
 import EmojiBoard from 'rn-emoji-keyboard';
 import {useActionSheet} from '@expo/react-native-action-sheet';
 import ActivityIndicator from '../../ui/ActivityIndicator';
+import {IMessages} from '../../types/Message';
 
 interface IChatInput {
   onChange: (prop: string) => void;
   onSend: () => void;
   text: string;
+  repliedMessage: IMessages;
   selectImage?: () => void;
   showSelectImage: boolean;
   openCamera: () => void;
   openLibrary: () => void;
   disabled?: boolean;
   isImageUploading: boolean;
+  image: string;
 }
 
 function ChatInput({
@@ -25,6 +28,7 @@ function ChatInput({
   text,
   openCamera,
   openLibrary,
+  image,
   onSend,
   isImageUploading,
   disabled,
@@ -54,7 +58,8 @@ function ChatInput({
       },
     );
   };
-  const _disabled = !text?.replace(/\s/g, '').length > 0 ? true : false;
+
+  const _disabled = !image && (!text || !text.trim());
   return (
     <KeyboardAvoidingView className="flex-row bg-transparent absolute border-white rounded-full border-[0.3px] border-solid bottom-2 mx-2 self-center flex-[1]">
       <View className="flex-row flex-1 max-h-14">
@@ -64,16 +69,18 @@ function ChatInput({
             numberOfLines={4}
             value={text}
             clearButtonMode="always"
-            cursorColor={showSelectImage ? 'black' : 'white'}
+            cursorColor={'white'}
             onChangeText={_val => onChange(_val)}
             left={
-              <TextInput.Icon
-                onPress={onPress}
-                icon={'image-outline'}
-                color={'white'}
-              />
+              showSelectImage && (
+                <TextInput.Icon
+                  onPress={onPress}
+                  icon={'image-outline'}
+                  color={'white'}
+                />
+              )
             }
-            textColor={showSelectImage ? 'black' : 'white'}
+            textColor={'white'}
             placeholder="Type Your Message Here ...."
             className=" bg-transparent text-white shadow-slate-950 "
           />

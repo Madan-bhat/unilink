@@ -1,159 +1,113 @@
 import React from 'react';
-import {Dimensions, View} from 'react-native';
+import {FlashList} from '@shopify/flash-list';
+import {Text, TouchableOpacity, View} from 'react-native';
 
-import {
-  Bubble,
-  Day,
-  GiftedChat,
-  LoadEarlier,
-  MessageImage,
-  MessageText,
-} from 'react-native-gifted-chat';
+import {IUser} from '../../types/user';
+import {IMessages} from '../../types/Message';
+
+import ChatBubble from '../ChatBubble';
 import ChatInput from '../ChatInput';
-import Text from '../../ui/Text';
+import ActivityIndicator from '../../ui/ActivityIndicator';
+import ReplyBox from '../ReplyBox';
 
-const chatComponentsStyles = {
-  loadEarlierStyles: {
-    borderStyle: 'solid',
-    borderColor: 'rgba(255, 255, 255, 0.4)',
-    borderWidth: 0.2,
-    backgroundColor: '#171918',
-    marginBottom: 4,
-    padding: 4,
-  },
-  chatBubble: {
-    right: {
-      padding: 4,
-      marginTop: 4,
-      shadowColor: '#0a0a0a',
-      elevation: 14,
-      backgroundColor: 'rgba(162, 164, 171, 0.4)',
-    },
-    left: {
-      borderStyle: 'solid',
-      borderColor: 'rgba(255, 255, 255, 0.4)',
-      borderWidth: 0.2,
-      backgroundColor: '#0a0a0a',
-      marginBottom: 4,
-      padding: 4,
-    },
-  },
-  dateStyles: {
-    fontFamily: 'Poppins-Bold',
-    color: 'rgba(255, 255, 255, 0.8)',
-    fontSize: 14,
-  },
-  listViewProps: {
-    showsVerticalScrollIndicator: false,
-    marginBottom: 25,
-  },
-  imageStyles: {
-    width: Dimensions.get('window').width / 1.5,
-    height: Dimensions.get('window').height / 4.5,
-  },
-  textStyles: {
-    color: 'white',
-    fontFamily: 'Poppins-Regular',
-  },
-};
-
-interface IMessages {
-  messages: any;
+interface IMessage {
+  messages: IMessages[];
   loading: boolean;
-  chatUser: any;
-  onSend: any;
-  currentUser: any;
+  chatUser: IUser;
+  onSend: () => void;
+  repliedMessage: IMessages | null;
+  currentUser: IUser;
   text: string;
+  image: string;
   openCamera: () => void;
   openLibrary: () => void;
+  docid: string;
+  handleShowMessageBox: (props: boolean) => void;
   handleInputChange: (props: string) => void;
   loadMore: () => void;
+  messagesLoading: boolean;
+  closeBox: () => void;
   onLike: (props: string) => void;
+  handleChangeInReplyMessage: (prop: IMessages) => void;
 }
 
 function Messages({
+  closeBox,
+  handleChangeInReplyMessage,
   messages,
   openCamera,
+  messagesLoading,
   openLibrary,
   handleInputChange,
+  loadMore,
   currentUser,
+  repliedMessage,
+  chatUser,
+  handleShowMessageBox,
   text,
   onSend,
   loading,
-  loadMore,
-}: IMessages) {
+  image,
+  docid,
+}: IMessage) {
+  const renderItem = ({item, index}: {item: IMessages; index: number}) => {
+    return (
+      <ChatBubble
+        repliedMessage={repliedMessage}
+        handleShowMessageBox={handleShowMessageBox}
+        docid={docid}
+        chatUser={chatUser}
+        item={item}
+        index={index}
+        messages={messages}
+        handleChangeInReplyMessage={handleChangeInReplyMessage}
+        currentUser={currentUser}
+      />
+    );
+  };
   return (
     <View className="h-full flex-[10] rouned-t-[35px] bg-primary">
       <View className=" rounded-t-[40px] h-full overflow-hidden bg-primary">
         <View className=" h-full shadow-slate-900 bg-primary overflow-hidden ">
-          <GiftedChat
-            onInputTextChanged={val => handleInputChange(val)}
-            showUserAvatar={false}
-            renderMessageText={props => (
-              <>
-                <MessageText
-                  {...props}
-                  textStyle={{
-                    ...chatComponentsStyles.textStyles?.color,
-                  }}
-                  customTextStyle={{...chatComponentsStyles.textStyles}}
-                />
-                <Text>{props.currentMessage?.status}</Text>
-              </>
-            )}
-            renderMessageImage={props => {
-              return (
-                <MessageImage
-                  {...props}
-                  imageStyle={{
-                    ...chatComponentsStyles.imageStyles,
-                  }}
-                />
-              );
-            }}
-            renderDay={props => {
-              return (
-                <Day {...props} textStyle={chatComponentsStyles?.dateStyles} />
-              );
-            }}
-            renderLoadEarlier={props => (
-              <LoadEarlier
-                {...props}
-                wrapperStyle={chatComponentsStyles.loadEarlierStyles}
-              />
-            )}
-            renderInputToolbar={props => (
-              <>
-                <ChatInput
-                  openCamera={openCamera}
-                  text={text}
-                  openLibrary={openLibrary}
-                  onChange={handleInputChange}
-                  onSend={onSend}
-                  showSelectImage={false}
-                  isImageUploading={false}
-                />
-              </>
-            )}
-            isLoadingEarlier={loading}
-            onLoadEarlier={loadMore}
-            loadEarlier
-            renderBubble={props => {
-              return (
-                <Bubble
-                  {...props}
-                  wrapperStyle={{
-                    ...chatComponentsStyles.chatBubble,
-                  }}
-                />
-              );
-            }}
-            listViewProps={chatComponentsStyles?.listViewProps}
-            messages={messages}
-            onSend={message => onSend(message)}
-            user={{
-              _id: currentUser?.uid,
-            }}
+          <View
+            className={
+              repliedMessage !== null ? 'h-full pb-[128px]' : 'h-full pb-[78px]'
+            }>
+            <FlashList
+              onEndReached={loadMore}
+              onEndReachedThreshold={0.1}
+              ListFooterComponent={
+                messagesLoading ? (
+                  <ActivityIndicator size={24} color="white" />
+                ) : (
+                  <></>
+                )
+              }
+              showsVerticalScrollIndicator={false}
+              estimatedItemSize={200}
+              inverted
+              data={messages}
+              renderItem={renderItem}
+            />
+          </View>
+          {repliedMessage && (
+            <ReplyBox
+              closeBox={closeBox}
+              message={repliedMessage}
+              currentUser={currentUser}
+              chatUser={chatUser}
+            />
+          )}
+          <ChatInput
+            repliedMessage={repliedMessage}
+            onChange={handleInputChange}
+            onSend={onSend}
+            text={text}
+            showSelectImage={true}
+            openCamera={openCamera}
+            openLibrary={openLibrary}
+            isImageUploading={loading}
+            image={image}
           />
         </View>
       </View>

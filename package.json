@@ -25,6 +25,7 @@
     "@react-navigation/native-stack": "^6.9.15",
     "@reduxjs/toolkit": "^1.9.7",
     "@shopify/flash-list": "^1.6.2",
+    "dayjs": "^1.11.10",
     "lodash": "^4.17.21",
     "moment": "^2.29.4",
     "nativewind": "^2.0.11",

@@ -4,8 +4,7 @@ import * as Animatable from 'react-native-animatable';
 import Text from '../../ui/Text';
 
 import AntDesign from 'react-native-vector-icons/AntDesign';
-import Modal from '../../ui/Modal';
-import {Portal, TextInput} from 'react-native-paper';
+import {TextInput} from 'react-native-paper';
 import Input from '../../ui/Input';
 import Image from '../../ui/Image';
 import ImageCropPicker from 'react-native-image-crop-picker';
@@ -13,15 +12,17 @@ import {useRegisterMutation} from '../../redux/apis/login.api';
 import {validateRegistrationUser} from '../../utils/validateUser';
 import ActivityIndicator from '../../ui/ActivityIndicator';
 
+type IUserInfo = {
+  email: string;
+  userName: string;
+  userImg: string;
+  password: string;
+};
+
 export default function Register() {
   const [register, {error}] = useRegisterMutation();
-  const [loading, setLoading] = useState(false);
-  const [userInfo, setUserInfo] = useState<{
-    email: string;
-    userName: string;
-    userImg: string;
-    password: string;
-  }>({
+  const [loading, setLoading] = useState<Boolean>(false);
+  const [userInfo, setUserInfo] = useState<IUserInfo>({
     email: '',
     password: '',
     userName: '',
@@ -61,7 +62,7 @@ export default function Register() {
       height: 400,
       cropping: true,
       includeBase64: true,
-    }).then(image => {
+    }).then((image: any) => {
       setUserInfo({
         ...userInfo,
         userImg: `data:image/png;base64,${image?.data}`,

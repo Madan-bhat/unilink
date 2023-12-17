@@ -1,13 +1,16 @@
-import {View, TouchableOpacity, Text, Alert, ToastAndroid} from 'react-native';
+import {View, TouchableOpacity, ToastAndroid} from 'react-native';
 import React, {useCallback, useState} from 'react';
 import AntDesign from 'react-native-vector-icons/AntDesign';
 import firestore from '@react-native-firebase/firestore';
 import Image from '../../ui/Image';
+import Text from '../../ui/Text';
+
 import Input from '../../ui/Input';
 import ImageCropPicker from 'react-native-image-crop-picker';
 import {useActionSheet} from '@expo/react-native-action-sheet';
 import {useSelector} from 'react-redux';
 import {useNavigation} from '@react-navigation/native';
+import {IUser} from '../../types/user';
 
 const PLACEHOLDER_IMG =
   'https://static.vecteezy.com/system/resources/previews/005/129/844/non_2x/profile-user-icon-isolated-on-white-background-eps10-free-vector.jpg';
@@ -15,9 +18,15 @@ const PLACEHOLDER_IMG =
 export default function EditProfile() {
   const [userNameError, setUserNameError] = useState('');
   const [image, setImage] = useState('');
-  const currentUser = useSelector(state => state?.user?.currentUser);
+  const currentUser = useSelector(
+    (state: {
+      user: {
+        currentUser: IUser;
+      };
+    }) => state?.user?.currentUser,
+  );
   const navigation = useNavigation();
-  const [user, setUser] = useState({
+  const [user, setUser] = useState<IUser | any>({
     userName: '',
     userImg: '',
     description: '',
@@ -90,7 +99,7 @@ export default function EditProfile() {
     [currentUser?.description, currentUser?.userName],
   );
 
-  const checkUsernameExists = async username => {
+  const checkUsernameExists = async (username: string): boolean => {
     try {
       const usersRef = firestore().collection('users');
       const snapshot = await usersRef.where('username', '==', username).get();
@@ -119,11 +128,13 @@ export default function EditProfile() {
             description: user?.description || currentUser?.description,
             userName: user?.userName || currentUser?.userName,
           })
-          .then(d => {
+          .then(data => {
             ToastAndroid.show('Updated Successfully !!!', ToastAndroid.LONG);
             navigation.goBack();
           });
-      } catch (e) {}
+      } catch (e) {
+        console.log(e);
+      }
     } else {
       ToastAndroid.show(
         'Fill All the Fields. Before You Proceed',

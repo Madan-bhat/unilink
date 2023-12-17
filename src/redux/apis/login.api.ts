@@ -26,8 +26,8 @@ export const login = createApi({
       async queryFn({
         email,
         userName,
-        password,
         userImg,
+        password,
       }: {
         email: string;
         password: string;
@@ -38,6 +38,11 @@ export const login = createApi({
           await auth()
             .createUserWithEmailAndPassword(email, password)
             .then(({user}) => {
+              user?.sendEmailVerification();
+              ToastAndroid.show(
+                'Email Verifcation Sent!! Please Verify Your Email',
+                ToastAndroid.LONG,
+              );
               user?.updateProfile({
                 photoURL: `data:image/png;base64,${userImg}`,
               });

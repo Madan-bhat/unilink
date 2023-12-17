@@ -1,3 +1,4 @@
+/// <reference types="nativewind/types" />
 import {Dimensions, View} from 'react-native';
 import React, {useCallback, useEffect, useState} from 'react';
 import Text from '../../ui/Text';

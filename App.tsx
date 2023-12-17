@@ -5,6 +5,7 @@ import MainStack from './src/routes/MainStack';
 import {store} from './src/redux/store.config';
 import {PaperProvider} from 'react-native-paper';
 import {ActionSheetProvider} from '@expo/react-native-action-sheet';
+
 import PushNotification from 'react-native-push-notification';
 
 export default function App() {
