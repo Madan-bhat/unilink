@@ -14,10 +14,11 @@ import Search from '../../pages/Search';
 import Register from '../../pages/Register';
 import ImageView from '../../components/ImageView';
 import EditProfile from '../../pages/EditProfile';
+import Information from '../../pages/Information';
+import ActivityIndicator from '../../ui/ActivityIndicator';
 
 import {ScreenNames} from '../../utils/screenConfig';
 import {user} from '../../utils/user';
-import Information from '../../pages/Information';
 
 const {Screen, Navigator} = createNativeStackNavigator();
 
@@ -73,15 +74,17 @@ function MainStack() {
   }));
 
   return (
-    <Navigator
-      screenOptions={{
-        animation: 'slide_from_right',
-        headerShown: false,
-      }}>
-      {screens?.map(screen => (
-        <Screen name={screen?.name} component={screen.component} />
-      ))}
-    </Navigator>
+    <React.Suspense fallback={<ActivityIndicator />}>
+      <Navigator
+        screenOptions={{
+          animation: 'slide_from_right',
+          headerShown: false,
+        }}>
+        {screens?.map(screen => (
+          <Screen name={screen?.name} component={screen.component} />
+        ))}
+      </Navigator>
+    </React.Suspense>
   );
 }
 

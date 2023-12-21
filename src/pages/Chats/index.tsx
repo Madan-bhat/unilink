@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {useCallback, useEffect, useMemo, useState} from 'react';
 import firestore from '@react-native-firebase/firestore';
 import auth from '@react-native-firebase/auth';
 import AntDesign from 'react-native-vector-icons/AntDesign';
@@ -14,32 +14,38 @@ import {ScreenNames} from '../../utils/screenConfig';
 import {user} from '../../utils/user';
 import {useBackHandler} from '../../hooks/useBackHandler';
 import VerificationBanner from '../../components/VerificationBanner';
+import {IMessages} from '../../types/Message';
 
 export default function Chats() {
   const [userchats, setUserchats] = useState([]);
+  const [refreshing, setRefresh] = useState(false);
   const navigation = useNavigation();
   useBackHandler();
 
+  const getChats = useCallback(() => {
+    setRefresh(!refreshing);
+    const userRef = firestore().collection('users').doc(user?.uid);
+    userRef.onSnapshot(doc => {
+      const data = doc.data();
+      setUserchats(data?.chats);
+      if (data) {
+        setUserchats(data.chats);
+        setRefresh(false);
+      }
+    });
+  }, [refreshing]);
+
   useEffect(() => {
-    const subscribeTochatsChanges = () => {
-      const userRef = firestore().collection('users').doc(user?.uid);
-      const unsubscribe = userRef.onSnapshot(doc => {
-        const data = doc.data();
-        if (data) {
-          setUserchats(data.chats);
-        }
-      });
-      return unsubscribe;
-    };
-    const unsubscribe = subscribeTochatsChanges();
-    return () => {
-      unsubscribe();
-    };
+    getChats();
   }, []);
 
   const handleSearchPageNavigation = () => {
     navigation.navigate(ScreenNames.search);
   };
+
+  const renderItem = useCallback(({item}: any) => {
+    return <ChatList item={item} />;
+  }, []);
 
   return (
     <View className="bg-black flex-1">
@@ -55,24 +61,28 @@ export default function Chats() {
           </TouchableOpacity>
         </View>
       </View>
-      <View className="h-full overflow-hidden p-4 bg-primary rounded-t-3xl w-full mt-4">
+      <View className="h-full overflow-hidden  p-4 pb-[186px] bg-primary rounded-t-3xl w-full mt-4">
         {auth().currentUser?.emailVerified === false && <VerificationBanner />}
-
-        <FlashList
-          estimatedItemSize={200}
-          ListEmptyComponent={
-            <View
-              style={{height: Dimensions.get('window').height / 1.2}}
-              className=" h-full justify-center items-center flex-1">
-              <Text className="font-sans-bold text-lg max-w-xs text-center">
-                Start Chatting now by pressing + icon
-              </Text>
-            </View>
-          }
-          className="rounded-t-3xl"
-          data={userchats}
-          renderItem={({item}) => <ChatList item={item} />}
-        />
+        <View className="h-full w-full">
+          <FlashList
+            // keyExtractor={({item}: {item: IMessages}) => item?.text?.toString()}
+            showsVerticalScrollIndicator={false}
+            refreshing={refreshing}
+            onRefresh={getChats}
+            estimatedItemSize={200}
+            ListEmptyComponent={
+              <View
+                style={{height: Dimensions.get('window').height / 1.2}}
+                className=" h-full justify-center items-center flex-1">
+                <Text className="font-sans-bold text-lg max-w-xs text-center">
+                  Start Chatting now by pressing + icon
+                </Text>
+              </View>
+            }
+            data={userchats}
+            renderItem={renderItem}
+          />
+        </View>
       </View>
     </View>
   );

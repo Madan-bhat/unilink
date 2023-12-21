@@ -1,5 +1,6 @@
 import * as React from 'react';
 import Ionicons from 'react-native-vector-icons/Ionicons';
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import Profile from '../../pages/Profile';
 import Requests from '../../pages/Requests';
 import Chats from '../../pages/Chats';
@@ -8,6 +9,8 @@ import {createMaterialBottomTabNavigator} from '@react-navigation/material-botto
 
 import {ScreenNames} from '../../utils/screenConfig';
 import {useSelector} from 'react-redux';
+import Groups from '../../pages/Groups';
+import PushNotification from 'react-native-push-notification';
 // !auth().currentUser?.emailVerified ? (
 //   <View className="bg-black flex-1 p-3 justify-center align-middle">
 //     <Text className="font-sans-bold text-white text-lg text-center">
@@ -31,8 +34,12 @@ const Tab = createMaterialBottomTabNavigator();
 export default function TabStack() {
   const currentUser = useSelector((state: any) => state?.user?.currentUser);
   const showBadge = currentUser?.requests?.length > 0 && {
-    tabBarBadge: 0,
+    tabBarBadge: currentUser?.requests?.length
+      ? currentUser?.requests?.length
+      : 0,
   };
+
+  PushNotification?.cancelAllLocalNotifications();
 
   return (
     <Tab.Navigator
@@ -70,8 +77,10 @@ export default function TabStack() {
         options={{
           tabBarIcon(props) {
             return (
-              <MaterialIcons
-                name={!props?.focused ? 'groups' : 'groups-outline'}
+              <MaterialCommunityIcons
+                name={
+                  !props?.focused ? 'account-group-outline' : 'account-group'
+                }
                 size={24}
                 color={props.color}
               />

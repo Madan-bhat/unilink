@@ -1,6 +1,7 @@
 import firestore from '@react-native-firebase/firestore';
 import {sendNotification} from './notifications';
 import {IMessages} from '../types/Message';
+import {saveMessageToLocal} from './fs';
 
 interface ISend {
   message: any[];
@@ -64,7 +65,6 @@ export const sendMessage = async ({
     if (image) {
       url = await uploadImage();
     }
-
     const createdAt = new Date();
 
     const msg = {
@@ -82,8 +82,9 @@ export const sendMessage = async ({
         _id: currentUser.uid,
         avatar: chatUser?.userImg || PLACEHOLDER_IMG,
       },
-      readBy: firestore.FieldValue.arrayUnion(currentUser?.uid),
+      readBy: [currentUser?.uid],
     };
+    saveMessageToLocal(msg, docid);
 
     await firestore()
       .collection('chatRoom')
@@ -98,8 +99,15 @@ export const sendMessage = async ({
     if (selectedImageModalVisible) {
       handleToggleSelectedImageModal();
     }
+    const sendNotificationProps = {
+      chatUser,
+      currentUser,
+      docId: docid,
+      text,
+      image,
+    };
+    sendNotification(sendNotificationProps);
     handleCloseReplyBox();
-    sendNotification({chatUser, currentUser});
     setImageUploading(false);
   } catch (error) {
     console.error('Error sending message:', error);

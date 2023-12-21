@@ -3,7 +3,7 @@ import React from 'react';
 
 export default function Groups() {
   return (
-    <View>
+    <View className="h-full w-full bg-black">
       <Text>Groups</Text>
     </View>
   );

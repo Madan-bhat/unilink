@@ -59,7 +59,8 @@ export default function ChatList({item}: any) {
     firestore()
       .collection('users')
       .doc(item)
-      .onSnapshot((data: any) => {
+      .get()
+      .then((data: any) => {
         return setUser(data?.data());
       });
   }, [item]);
@@ -73,10 +74,15 @@ export default function ChatList({item}: any) {
   }, [navigation, item]);
 
   useEffect(() => {
-    getUserDetail();
+    setTimeout(() => {
+      getUserDetail();
+    }, 1000);
+  }, [getUserDetail]);
+
+  useEffect(() => {
     getLatestMessage();
     getUnreadMessage();
-  }, [getLatestMessage, getUnreadMessage, getUserDetail, unreadMessages]);
+  }, [getLatestMessage, getUnreadMessage, unreadMessages]);
 
   return (
     <TouchableOpacity
