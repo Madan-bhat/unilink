@@ -4,10 +4,12 @@ import firestore from '@react-native-firebase/firestore';
 import AntDesign from 'react-native-vector-icons/AntDesign';
 
 import Image from '../../ui/Image';
-import {user} from '../../utils/user';
+import useChatUser from '../../hooks/useUser';
+import {useSelector} from 'react-redux';
 
 export default function RequestLists({item}: any) {
-  const [users, setUser] = useState<any>();
+  const user = useSelector(state => state.user.currentUser);
+  const users = useChatUser({uid: item});
 
   const reject = useCallback(() => {
     try {
@@ -50,20 +52,6 @@ export default function RequestLists({item}: any) {
       console.error('Error accepting request:', error);
     }
   }, [item]);
-
-  const getUserDetail = useCallback(() => {
-    firestore()
-      .collection('users')
-      .doc(item)
-      .get()
-      .then(data => {
-        return setUser(data?.data());
-      });
-  }, [item]);
-
-  useEffect(() => {
-    getUserDetail();
-  }, [getUserDetail]);
 
   return (
     <View className=" p-2 rounded-md bg-primary mt-2 w-full">

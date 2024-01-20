@@ -10,7 +10,6 @@ import PushNotification from 'react-native-push-notification';
 
 export default function App() {
   PushNotification?.cancelAllLocalNotifications();
-
   return (
     <ActionSheetProvider>
       <PaperProvider>

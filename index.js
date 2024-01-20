@@ -41,9 +41,11 @@ messaging().setBackgroundMessageHandler(async remoteMessage => {
     title: remoteMessage?.data?.userName,
     groupSummary: true,
     smallIcon: '',
+    largeIconUrl: remoteMessage?.data?.userImg,
+    largeIcon: 'ic_notification',
     bigLargeIconUrl:
       'https://53.fs1.hubspotusercontent-na1.net/hub/53/hubfs/image8-2.jpg?width=1190&height=800&name=image8-2.jpg',
-    message: remoteMessage?.data?.text,
+    message: 'sent a chat',
   });
 });
 

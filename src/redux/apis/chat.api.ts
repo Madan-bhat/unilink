@@ -1,6 +1,5 @@
 import {createApi} from '@reduxjs/toolkit/query/react';
 import {baseQuery} from '../redux.config';
-import auth from '@react-native-firebase/auth';
 
 export const chat = createApi({
   reducerPath: 'chat',

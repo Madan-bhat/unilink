@@ -37,7 +37,9 @@ export default function Loading() {
             });
           user.reload();
           user.getIdToken(true);
-          navigation.replace(ScreenNames.dashboard);
+          navigation.replace(ScreenNames.dashboard, {
+            uid: user?.uid,
+          });
         } else {
           navigation.replace(ScreenNames.login);
         }

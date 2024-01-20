@@ -1,11 +1,5 @@
 import {View, Text, TouchableOpacity, ToastAndroid} from 'react-native';
-import React, {
-  createRef,
-  useCallback,
-  useEffect,
-  useRef,
-  useState,
-} from 'react';
+import React, {useCallback, useEffect, useRef} from 'react';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 
@@ -40,6 +34,9 @@ export default function ChatBubble({
   currentUser: IUser;
   docid: string;
 }) {
+  const PLACEHOLDER_IMG =
+    'https://static.vecteezy.com/system/resources/previews/005/129/844/non_2x/profile-user-icon-isolated-on-white-background-eps10-free-vector.jpg';
+
   const navigation = useNavigation();
   let swipeRef = useRef<Swipeable | null>(null);
 
@@ -88,7 +85,7 @@ export default function ChatBubble({
   };
 
   return (
-    <GestureHandlerRootView>
+    <GestureHandlerRootView key={item?.id}>
       <Swipeable
         rightThreshold={20}
         renderRightActions={renderActions}
@@ -168,7 +165,7 @@ export default function ChatBubble({
               item?.sentBy !== messages[index - 1]?.sentBy && (
                 <Image
                   className="h-10 absolute top-5 w-10 rounded-full"
-                  source={{uri: chatUser?.userImg}}
+                  source={{uri: chatUser?.userImg || PLACEHOLDER_IMG}}
                 />
               )}
             {IS_CURRENT_USER &&

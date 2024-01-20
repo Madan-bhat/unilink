@@ -1,7 +1,6 @@
 import firestore from '@react-native-firebase/firestore';
 import {sendNotification} from './notifications';
 import {IMessages} from '../types/Message';
-import {saveMessageToLocal} from './fs';
 
 interface ISend {
   message: any[];
@@ -84,7 +83,6 @@ export const sendMessage = async ({
       },
       readBy: [currentUser?.uid],
     };
-    saveMessageToLocal(msg, docid);
 
     await firestore()
       .collection('chatRoom')

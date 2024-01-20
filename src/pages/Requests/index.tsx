@@ -6,25 +6,19 @@ import {FlashList} from '@shopify/flash-list';
 import firestore from '@react-native-firebase/firestore';
 import {user} from '../../utils/user';
 import RequestLists from '../../components/RequestLists';
+import {useSelector} from 'react-redux';
+import {IUser} from '../../types/user';
+import useChatUser from '../../hooks/useUser';
 
 export default function Requests() {
-  let [userRequests, setRequests] = useState([]);
-
-  const getRequests = useCallback(() => {
-    try {
-      firestore()
-        .collection('users')
-        .doc(user?.uid)
-        .onSnapshot(data => {
-          let userData = data.data();
-          setRequests(userData?.requests);
-        });
-    } catch (e) {}
-  }, []);
-
-  useEffect(() => {
-    getRequests();
-  }, [getRequests]);
+  interface istate {
+    user: {
+      currentUser: IUser;
+    };
+  }
+  let currentUser = useSelector((state: istate) => state?.user?.currentUser);
+  let userReq = useChatUser({uid: currentUser?.uid})?.requests;
+  console.log(userReq);
 
   return (
     <View className="bg-primary pb-24 flex-1 p-4">
@@ -46,7 +40,7 @@ export default function Requests() {
             }
             className="flex flex-1 "
             estimatedItemSize={200}
-            data={userRequests}
+            data={userReq}
             renderItem={({item}) => <RequestLists item={item} />}
           />
         </View>

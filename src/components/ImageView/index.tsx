@@ -35,7 +35,6 @@ export default function ImageView({image}: any) {
           'Image Saved in The Download folder',
           ToastAndroid.LONG,
         );
-        console.log('Image downloaded successfully');
       } else {
         console.error('Failed to download image');
       }

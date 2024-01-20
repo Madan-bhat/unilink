@@ -9,35 +9,18 @@ import {useNavigation} from '@react-navigation/native';
 
 import Text from '../../ui/Text';
 import ChatList from '../../components/ChatList';
+import VerificationBanner from '../../components/VerificationBanner';
 
 import {ScreenNames} from '../../utils/screenConfig';
-import {user} from '../../utils/user';
 import {useBackHandler} from '../../hooks/useBackHandler';
-import VerificationBanner from '../../components/VerificationBanner';
-import {IMessages} from '../../types/Message';
+import {useSelector} from 'react-redux';
 
 export default function Chats() {
-  const [userchats, setUserchats] = useState([]);
-  const [refreshing, setRefresh] = useState(false);
+  const currentUser = useSelector((state: any) => state.user?.currentUser);
+  const [refreshing] = useState(false);
   const navigation = useNavigation();
+
   useBackHandler();
-
-  const getChats = useCallback(() => {
-    setRefresh(!refreshing);
-    const userRef = firestore().collection('users').doc(user?.uid);
-    userRef.onSnapshot(doc => {
-      const data = doc.data();
-      setUserchats(data?.chats);
-      if (data) {
-        setUserchats(data.chats);
-        setRefresh(false);
-      }
-    });
-  }, [refreshing]);
-
-  useEffect(() => {
-    getChats();
-  }, []);
 
   const handleSearchPageNavigation = () => {
     navigation.navigate(ScreenNames.search);
@@ -65,10 +48,8 @@ export default function Chats() {
         {auth().currentUser?.emailVerified === false && <VerificationBanner />}
         <View className="h-full w-full">
           <FlashList
-            // keyExtractor={({item}: {item: IMessages}) => item?.text?.toString()}
             showsVerticalScrollIndicator={false}
             refreshing={refreshing}
-            onRefresh={getChats}
             estimatedItemSize={200}
             ListEmptyComponent={
               <View
@@ -79,7 +60,7 @@ export default function Chats() {
                 </Text>
               </View>
             }
-            data={userchats}
+            data={currentUser?.chats}
             renderItem={renderItem}
           />
         </View>

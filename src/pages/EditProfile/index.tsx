@@ -48,7 +48,6 @@ export default function EditProfile() {
   };
 
   const choosePhotoFromLibrary = useCallback(() => {
-    console.log('pressed');
     ImageCropPicker.openPicker({
       compressImageQuality: 0.5,
       includeBase64: true,
@@ -133,7 +132,7 @@ export default function EditProfile() {
             navigation.goBack();
           });
       } catch (e) {
-        console.log(e);
+        throw e;
       }
     } else {
       ToastAndroid.show(

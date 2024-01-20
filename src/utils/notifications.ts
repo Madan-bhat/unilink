@@ -22,12 +22,12 @@ export const sendNotification = async ({
       priority: 'high',
     },
     data: {
-      text,
       screen: ScreenNames.chat,
       image: image ? image : '',
       group: docId,
       userName: currentUser?.userName,
-      // userImg: currentUser?.userImg,
+      userImg:
+        'https://static.vecteezy.com/system/resources/previews/005/129/844/non_2x/profile-user-icon-isolated-on-white-background-eps10-free-vector.jpg',
     },
   };
   let headers = new Headers({

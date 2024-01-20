@@ -5,13 +5,12 @@ import Image from '../../ui/Image';
 import {useNavigation} from '@react-navigation/native';
 import {ScreenNames} from '../../utils/screenConfig';
 import {user as currentUser} from '../../utils/user';
+import useChatUser from '../../hooks/useChatUser';
 
 export default function ChatList({item}: any) {
-  const [users, setUser] = useState<any>();
   const [unreadMessages, setUnreadMessages] = useState<any>();
-  const [latestMessage, setLatestMessage] = useState<any>('');
   const navigation = useNavigation();
-
+  const users = useChatUser({uid: item});
   const docid =
     item > currentUser?.uid
       ? currentUser?.uid + '-' + item
@@ -25,7 +24,6 @@ export default function ChatList({item}: any) {
         .collection('messages')
         .onSnapshot(querySnapshot => {
           let unreadMessageCount = 0;
-
           querySnapshot.forEach(doc => {
             const readBy = doc.data()?.readBy || [];
             if (!readBy.includes(currentUser?.uid)) {
@@ -37,34 +35,6 @@ export default function ChatList({item}: any) {
     } catch (error) {}
   }, [docid]);
 
-  const getLatestMessage = useCallback(async () => {
-    try {
-      const querySnapshot = await firestore()
-        .collection('chatRoom')
-        .doc(docid)
-        .collection('messages')
-        .orderBy('createdAt', 'desc')
-        .limit(1);
-
-      querySnapshot.onSnapshot(data => {
-        data?.forEach(doc => {
-          const _latestMessage = doc.data();
-          setLatestMessage(_latestMessage);
-        });
-      });
-    } catch (error) {}
-  }, [docid]);
-
-  const getUserDetail = useCallback(() => {
-    firestore()
-      .collection('users')
-      .doc(item)
-      .get()
-      .then((data: any) => {
-        return setUser(data?.data());
-      });
-  }, [item]);
-
   const handlechatscreenNavigation = useCallback(() => {
     return navigation.navigate(ScreenNames.chat, {
       user: {
@@ -74,18 +44,12 @@ export default function ChatList({item}: any) {
   }, [navigation, item]);
 
   useEffect(() => {
-    setTimeout(() => {
-      getUserDetail();
-    }, 1000);
-  }, [getUserDetail]);
-
-  useEffect(() => {
-    getLatestMessage();
     getUnreadMessage();
-  }, [getLatestMessage, getUnreadMessage, unreadMessages]);
+  }, [getUnreadMessage]);
 
   return (
     <TouchableOpacity
+      key={item?.id?.toString()}
       onPress={handlechatscreenNavigation}
       className="bg-white-900 mt-2 p-2 justify-between rounded-md my-2 w-full">
       <View className="flex-row items-center justify-between">
@@ -107,16 +71,27 @@ export default function ChatList({item}: any) {
             <Text className="text-white text-lg font-sans">
               {users?.userName}
             </Text>
-            <Text
-              numberOfLines={1}
-              ellipsizeMode="tail"
-              className="text-white font-sans max-w-[240px]">
-              {latestMessage?.text || 'No Description'}
-            </Text>
+            {unreadMessages > 0 ? (
+              <Text
+                numberOfLines={1}
+                ellipsizeMode="tail"
+                className="text-white font-sans-bold max-w-[240px]">
+                {unreadMessages === 1
+                  ? 'New Message Available'
+                  : 'New Messages Available'}
+              </Text>
+            ) : (
+              <Text
+                numberOfLines={1}
+                ellipsizeMode="tail"
+                className="text-white  max-w-[240px]">
+                {unreadMessages > 0 ? 'New Message' : 'Message Seen'}
+              </Text>
+            )}
           </View>
         </View>
         {unreadMessages > 0 && (
-          <View className="bg-slate-900 h-[24px] w-[24px] justify-center items-center rounded-full">
+          <View className="bg-black h-[24px] w-[24px] justify-center items-center rounded-full">
             <Text className="text-white font-sans-bold">
               {unreadMessages > 0 && unreadMessages}
             </Text>

@@ -22,27 +22,24 @@ import {
 import {IMessages} from '../../types/Message';
 
 export default function Chat() {
-  const currentUser: any = useSelector(
-    (state: {user: any}) => state?.user?.currentUser,
-  );
+  const currentUser = useSelector(state => state?.user?.currentUser);
   const [repliedMessage, setRepliedMessage] = useState<IMessages | null>(null);
   const {params} = useRoute();
-  const {user}: any = params;
+  const {user} = params;
   const docid =
     user?.uid > currentUser?.uid
-      ? currentUser?.uid + '-' + user?.uid
-      : user?.uid + '-' + currentUser?.uid;
+      ? `${currentUser?.uid}-${user?.uid}`
+      : `${user?.uid}-${currentUser?.uid}`;
 
-  const [messageBoxShown, setMessageBoxOpen] = useState<Boolean>(false);
+  const [messageBoxShown, setMessageBoxOpen] = useState(false);
   const [isImageUploading, setImageUploading] = useState(false);
-  const [loading] = useState(false);
   const [loadingMessages, setLoadingMessages] = useState(false);
   const [text, setText] = useState('');
   const [image, setImage] = useState('');
   const [selectedImageModalVisible, setSelectedImageModal] = useState(false);
   const [pagelimit, setPageLimit] = useState(10);
 
-  const chatUser: any = useChatUser({uid: user?.uid});
+  const chatUser = useChatUser({uid: user?.uid});
   const messages = useMessages({
     docId: docid,
     loading: loadingMessages,
@@ -51,8 +48,8 @@ export default function Chat() {
   });
 
   const handleShowMessageBox = useCallback(() => {
-    setMessageBoxOpen(!messageBoxShown);
-  }, [messageBoxShown]);
+    setMessageBoxOpen(prev => !prev);
+  }, []);
 
   const handleChangeInReplyMessage = useCallback((item: IMessages) => {
     setRepliedMessage(item);
@@ -60,15 +57,15 @@ export default function Chat() {
 
   const handleChangeInPageLimit = useCallback(() => {
     if (messages.length > 0) {
-      setLoadingMessages(!loadingMessages);
-      setPageLimit(pagelimit + 3);
-      setLoadingMessages(!loadingMessages);
+      setLoadingMessages(true);
+      setPageLimit(prev => prev + 3);
+      setLoadingMessages(false);
     }
-  }, [pagelimit, loadingMessages]);
+  }, [messages.length]);
 
   const handleToggleSelectedImageModal = useCallback(() => {
-    setSelectedImageModal(!selectedImageModalVisible);
-  }, [selectedImageModalVisible]);
+    setSelectedImageModal(prev => !prev);
+  }, []);
 
   const handleOpenCamera = useCallback(() => {
     takePhotoFromCamera(setImage, handleToggleSelectedImageModal);
@@ -81,30 +78,33 @@ export default function Chat() {
   const uploadImage = useCallback(async () => {
     if (image) {
       try {
-        setImageUploading(!isImageUploading);
+        setImageUploading(true);
         const response = await fetch(image);
         const blob = await response.blob();
-        const imageName = `${Date.now()}`; // You can use a unique name for each image
+        const imageName = `${Date.now()}`;
         const ref = storage().ref().child(`images/${imageName}`);
         await ref.put(blob);
         const url = await ref.getDownloadURL();
         return url;
       } catch (error) {
         console.error('Error uploading image:', error);
+        throw error; // Propagate the error
+      } finally {
+        setImageUploading(false);
       }
     }
-  }, [image, isImageUploading]);
+  }, [image]);
 
   const updateReadMessage = useCallback(
     debounce(() => {
-      let docRef = firestore()
+      const docRef = firestore()
         .collection('chatRoom')
         .doc(docid)
         .collection('messages');
-      let unsubscribe = docRef.get().then(querySnapshot => {
+      const unsubscribe = docRef.get().then(querySnapshot => {
         querySnapshot.forEach(doc => {
           docRef.doc(doc.id).update({
-            status: 'RECIEVED',
+            status: 'RECEIVED',
             readBy: firestore.FieldValue.arrayUnion(currentUser?.uid),
           });
         });
@@ -123,9 +123,9 @@ export default function Chat() {
   }, []);
 
   const onSend = useCallback(
-    (message = []) => {
-      return sendMessage({
-        message,
+    () =>
+      sendMessage({
+        message: [],
         image,
         text,
         currentUser,
@@ -141,8 +141,7 @@ export default function Chat() {
         setImage,
         setImageUploading,
         handleCloseReplyBox,
-      });
-    },
+      }),
     [
       repliedMessage,
       chatUser,
@@ -163,12 +162,7 @@ export default function Chat() {
     setText(val);
   }, []);
 
-  const onLike = useCallback(
-    (id: string) => {
-      return handleLike({docid, id});
-    },
-    [docid],
-  );
+  const onLike = useCallback((id: string) => handleLike({docid, id}), [docid]);
 
   return (
     <View className="flex h-full bg-primary">
@@ -188,7 +182,7 @@ export default function Chat() {
           onSend={onSend}
           currentUser={currentUser}
           chatUser={chatUser}
-          loading={loading}
+          loading={loadingMessages}
           loadMore={handleChangeInPageLimit}
           text={text}
           messages={messages}

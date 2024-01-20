@@ -1,4 +1,17 @@
 {
   "name": "unilink",
-  "displayName": "unilink"
+  "displayName": "unilink",
+  "expo": {
+    "extra": {
+      "eas": {
+        "projectId": "71331a3f-45c7-439d-a804-23719d193fa6"
+      }
+    },
+    "runtimeVersion": "1.0.0",
+    "updates": {
+      "url": "https://u.expo.dev/71331a3f-45c7-439d-a804-23719d193fa6"
+    },
+    "android": {},
+    "ios": {}
+  }
 }
